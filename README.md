@@ -1,4 +1,2 @@
-# sf-mellomvare-template
-Starting point for salesforce mellomvare
-
-Use IDE find all search for "template", to get an idea what needs to be replaced
+# sf-keytool
+Tool to generate certificates and keep track of expiry, used for salesforce middleware connections

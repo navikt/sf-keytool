@@ -1,4 +1,4 @@
-package no.nav.template
+package no.nav.sf.keytool
 
 val application = Application()
 

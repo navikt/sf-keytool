@@ -1,10 +1,10 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: template
-  namespace: teamcrm
+  name: sf-keytool
+  namespace: platforce
   labels:
-    team: teamcrm
+    team: platforce
 spec:
   image: "{{ image }}"
   port: 8080
@@ -21,7 +21,6 @@ spec:
   observability:
     logging:
       destinations:
-        - id: elastic
         - id: loki
   resources:
     limits:
@@ -30,7 +29,7 @@ spec:
       cpu: 10m
       memory: 512Mi
   ingresses:
-    - "https://sf-mellomvare.template.intern.dev.nav.no"
+    - "https://sf-keytool.intern.dev.nav.no"
   azure:
     application:
       enabled: true
@@ -48,8 +47,8 @@ spec:
 #        - application: salesforce
 #          namespace: teamcrm
 #          cluster: dev-external
-#  envFrom:
-#    - secret: template
+  envFrom:
+    - secret: sf-pubsub-preprod
   env:
     - name: AN_ENV
       value: "a value in dev"
