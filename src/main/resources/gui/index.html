@@ -20,13 +20,23 @@
     document.getElementById("f").onsubmit = async e => {
         e.preventDefault();
 
-        const form = new FormData(e.target);
-        const res = await fetch("/internal/cert", {
-            method: "POST",
-            body: form
+        const form = e.target;
+
+        const body = new URLSearchParams({
+            cn: form.cn.value,
+            days: form.days.value,
+            password: form.password.value
         });
 
-        // Auto-download .cer
+        const res = await fetch("/internal/cert", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body
+        });
+
+        // ---- download cert ----
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -37,11 +47,12 @@
         a.remove();
         URL.revokeObjectURL(url);
 
-        // Extract secrets
+        // ---- show secrets ----
         const jks = res.headers.get("X-KEYSTORE-JKS-B64");
         const pwd = res.headers.get("X-KEYSTORE-PASSWORD");
 
-        document.getElementById("out").textContent = `SF_KEYSTORE_JKS_B64=${jks}
+        document.getElementById("out").textContent =
+            `SF_KEYSTORE_JKS_B64=${jks}
 SF_KEYSTORE_PASSWORD=${pwd}
 
 Upload salesforce-jwt.cer to:
