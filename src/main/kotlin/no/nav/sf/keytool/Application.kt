@@ -41,7 +41,7 @@ class Application {
             "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
             "/internal/gui" bind Method.GET to static(ResourceLoader.Classpath("gui")),
             "/internal/access" bind Method.GET to { Response(OK).body("Got access token for instance: ${accessTokenHandler.instanceUrl}") },
-            "/internal/cert" bind Method.GET to certHandler,
+            "/internal/cert" bind Method.POST to certHandler,
         )
 
     /**
