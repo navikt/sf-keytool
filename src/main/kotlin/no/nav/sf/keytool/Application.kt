@@ -5,6 +5,7 @@ import no.nav.sf.keytool.token.AuthRouteBuilder
 import no.nav.sf.keytool.token.DefaultAccessTokenHandler
 import no.nav.sf.keytool.token.DefaultTokenValidator
 import no.nav.sf.keytool.token.MockTokenValidator
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Response
@@ -16,6 +17,7 @@ import org.http4k.routing.static
 import org.http4k.server.Http4kServer
 import org.http4k.server.Netty
 import org.http4k.server.asServer
+import java.security.Security
 
 class Application {
     private val log = KotlinLogging.logger { }
@@ -47,7 +49,14 @@ class Application {
      */
     infix fun String.authbind(method: Method) = AuthRouteBuilder(this, method, tokenValidator)
 
+    fun installBouncyCastle() {
+        if (Security.getProvider("BC") == null) {
+            Security.addProvider(BouncyCastleProvider())
+        }
+    }
+
     fun start() {
+        installBouncyCastle()
         log.info { "Starting in cluster $cluster" }
         apiServer(8080).start()
     }
