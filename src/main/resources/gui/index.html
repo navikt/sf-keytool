@@ -28,7 +28,7 @@
             password: form.password.value
         });
 
-        const res = await fetch("/internal/cert", {
+        const res = await fetch("/cert", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
