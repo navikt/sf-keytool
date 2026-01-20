@@ -1,6 +1,7 @@
 package no.nav.sf.keytool
 
 import mu.KotlinLogging
+import no.nav.sf.keytool.cert.certHandler
 import no.nav.sf.keytool.token.AuthRouteBuilder
 import no.nav.sf.keytool.token.DefaultAccessTokenHandler
 import no.nav.sf.keytool.token.DefaultTokenValidator
@@ -59,9 +60,5 @@ class Application {
         installBouncyCastle()
         log.info { "Starting in cluster $cluster" }
         apiServer(8080).start()
-    }
-
-    val certHandler: HttpHandler = {
-        Response(OK).body("Cert results")
     }
 }
