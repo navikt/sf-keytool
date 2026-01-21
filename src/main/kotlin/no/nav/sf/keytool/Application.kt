@@ -1,7 +1,10 @@
 package no.nav.sf.keytool
 
 import mu.KotlinLogging
+import no.nav.sf.keytool.cert.baseDir
 import no.nav.sf.keytool.cert.certHandler
+import no.nav.sf.keytool.cert.downloadHandler
+import no.nav.sf.keytool.cert.listCerts
 import no.nav.sf.keytool.token.AuthRouteBuilder
 import no.nav.sf.keytool.token.DefaultAccessTokenHandler
 import no.nav.sf.keytool.token.DefaultTokenValidator
@@ -13,12 +16,14 @@ import org.http4k.core.Response
 import org.http4k.core.Status.Companion.OK
 import org.http4k.routing.ResourceLoader
 import org.http4k.routing.bind
+import org.http4k.routing.path
 import org.http4k.routing.routes
 import org.http4k.routing.static
 import org.http4k.server.Http4kServer
 import org.http4k.server.Netty
 import org.http4k.server.asServer
 import java.security.Security
+import java.time.Instant
 
 class Application {
     private val log = KotlinLogging.logger { }
@@ -42,7 +47,39 @@ class Application {
             "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
             "/internal/gui" bind Method.GET to static(ResourceLoader.Classpath("gui")),
             "/internal/access" bind Method.GET to { Response(OK).body("Got access token for instance: ${accessTokenHandler.instanceUrl}") },
-            "/cert" bind Method.POST to certHandler,
+            // Generate + store cert under /tmp/sf-certs/{cn}
+            "/internal/cert/generate" bind Method.POST to certHandler,
+            // List existing certs
+            "/internal/cert/list" bind Method.GET to { _ ->
+                val list = listCerts()
+                Response(OK)
+                    .header("Content-Type", "application/json")
+                    .body(
+                        list.joinToString(
+                            prefix = "[",
+                            postfix = "]",
+                        ) {
+                            """
+                            {
+                              "cn": "${it.cn}",
+                              "expiresAt": "${it.expiresAt}",
+                              "daysLeft": ${
+                                java.time.Duration.between(
+                                    Instant.now(),
+                                    it.expiresAt,
+                                ).toDays()
+                            }
+                            }
+                            """.trimIndent()
+                        },
+                    )
+            },
+            // Download files: cer | jks | password
+            "/internal/cert/download/{cn}/{file}" bind Method.GET to { req ->
+                val cn = req.path("cn")!!
+                val file = req.path("file")!!
+                downloadHandler(cn, file)
+            },
         )
 
     /**
@@ -58,6 +95,7 @@ class Application {
 
     fun start() {
         installBouncyCastle()
+        baseDir.mkdirs()
         log.info { "Starting in cluster $cluster" }
         apiServer(8080).start()
     }

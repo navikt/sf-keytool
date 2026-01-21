@@ -1,63 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Salesforce JWT Cert Generator</title>
+    <meta charset="UTF-8" />
+    <title>Salesforce JWT Certificate Tool</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        input { margin: 0.3em 0; }
+        button { margin-top: 0.5em; }
+        table { border-collapse: collapse; margin-top: 1em; }
+        th, td { border: 1px solid #ccc; padding: 0.4em 0.6em; }
+        th { background: #f3f3f3; }
+        .warn { color: darkred; }
+    </style>
 </head>
 <body>
+
 <h2>Generate Salesforce JWT Certificate</h2>
 
-<form id="f">
-    CN: <input name="cn" value="salesforce-jwt"/><br/>
-    Validity days: <input name="days" value="1200"/><br/>
-    Keystore password: <input name="password" type="password"/><br/><br/>
-    <button type="submit">Generate & Download</button>
+<form id="generateForm">
+    <div>
+        CN (certificate name):
+        <input name="cn" required placeholder="salesforce-prod" />
+    </div>
+    <div>
+        Validity days:
+        <input name="days" value="1200" />
+    </div>
+    <div>
+        Keystore password:
+        <input name="password" type="password" required />
+    </div>
+    <button type="submit">Generate certificate</button>
 </form>
 
-<h3>NAIS secrets</h3>
-<pre id="out"></pre>
+<hr/>
+
+<h2>Existing certificates</h2>
+
+<button onclick="loadCerts()">Refresh list</button>
+
+<table id="certTable">
+    <thead>
+    <tr>
+        <th>CN</th>
+        <th>Expires</th>
+        <th>Days left</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
 
 <script>
-    document.getElementById("f").onsubmit = async e => {
-        e.preventDefault();
+    async function loadCerts() {
+        const res = await fetch("/internal/cert/list");
+        const list = await res.json();
 
-        const form = e.target;
+        const tbody = document.querySelector("#certTable tbody");
+        tbody.innerHTML = "";
+
+        list.forEach(c => {
+            const tr = document.createElement("tr");
+
+            const daysClass = c.daysLeft < 60 ? "warn" : "";
+
+            tr.innerHTML = `
+      <td>${c.cn}</td>
+      <td>${c.expiresAt}</td>
+      <td class="${daysClass}">${c.daysLeft}</td>
+      <td>
+        <a href="/internal/cert/download/${c.cn}/cer">.cer</a>
+        |
+        <a href="/internal/cert/download/${c.cn}/jks">.jks</a>
+        |
+        <a href="/internal/cert/download/${c.cn}/password" target="_blank">password</a>
+      </td>
+    `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    document.getElementById("generateForm").onsubmit = async e => {
+        e.preventDefault();
+        const f = e.target;
 
         const body = new URLSearchParams({
-            cn: form.cn.value,
-            days: form.days.value,
-            password: form.password.value
+            cn: f.cn.value,
+            days: f.days.value,
+            password: f.password.value
         });
 
-        const res = await fetch("/cert", {
+        const res = await fetch("/internal/cert/generate", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body
         });
 
-        // ---- download cert ----
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "salesforce-jwt.cer";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+        if (!res.ok) {
+            alert(await res.text());
+            return;
+        }
 
-        // ---- show secrets ----
-        const jks = res.headers.get("X-KEYSTORE-JKS-B64");
-        const pwd = res.headers.get("X-KEYSTORE-PASSWORD");
-
-        document.getElementById("out").textContent =
-            `SF_KEYSTORE_JKS_B64=${jks}
-SF_KEYSTORE_PASSWORD=${pwd}
-
-Upload salesforce-jwt.cer to:
-Salesforce → Connected App → OAuth → Certificates`;
+        f.reset();
+        loadCerts();
     };
+
+    loadCerts();
 </script>
+
 </body>
 </html>

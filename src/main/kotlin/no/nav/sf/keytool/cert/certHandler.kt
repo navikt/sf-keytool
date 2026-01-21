@@ -24,8 +24,84 @@ import java.security.PrivateKey
 import java.security.SecureRandom
 import java.security.Security
 import java.security.cert.X509Certificate
+import java.time.Instant
 import java.util.Base64
 import java.util.Date
+
+val baseDir = File("/tmp/sf-certs")
+
+data class CertMetadata(
+    val cn: String,
+    val expiresAt: Instant,
+)
+
+fun generateAndStoreCert(
+    cn: String,
+    days: Int,
+    password: String,
+): CertMetadata {
+    val dir = File(baseDir, cn)
+    require(!dir.exists()) { "Certificate with CN=$cn already exists" }
+    dir.mkdirs()
+
+    val keyPair = generateKeyPair()
+    val cert = generateCertificate(cn, keyPair, days)
+    val jksBytes = createKeystore(keyPair.private, cert, password)
+
+    File(dir, "$cn.cer").writeBytes(cert.encoded)
+    File(dir, "$cn.jks").writeBytes(jksBytes)
+    File(dir, "password.txt").writeText(password)
+
+    val expiresAt = cert.notAfter.toInstant()
+    File(dir, "metadata.json").writeText(
+        """
+        {
+          "cn": "$cn",
+          "expiresAt": "$expiresAt"
+        }
+        """.trimIndent(),
+    )
+
+    return CertMetadata(cn, expiresAt)
+}
+
+fun listCerts(): List<CertMetadata> =
+    baseDir.listFiles()?.mapNotNull { dir ->
+        val meta = File(dir, "metadata.json")
+        if (!meta.exists()) {
+            null
+        } else {
+            val expiresAt =
+                Regex("\"expiresAt\": \"(.*?)\"")
+                    .find(meta.readText())!!
+                    .groupValues[1]
+            CertMetadata(dir.name, Instant.parse(expiresAt))
+        }
+    } ?: emptyList()
+
+fun downloadHandler(
+    cn: String,
+    file: String,
+): Response {
+    val dir = File(baseDir, cn)
+    if (!dir.exists()) return Response(Status.NOT_FOUND)
+
+    val target =
+        when (file) {
+            "cer" -> File(dir, "$cn.cer")
+            "jks" -> File(dir, "$cn.jks")
+            "password" -> File(dir, "password.txt")
+            else -> return Response(Status.BAD_REQUEST)
+        }
+
+    if (!target.exists()) return Response(Status.NOT_FOUND)
+
+    return Response(Status.OK)
+        .header(
+            "Content-Disposition",
+            "attachment; filename=\"${target.name}\"",
+        ).body(target.inputStream())
+}
 
 val certHandler: HttpHandler = certHandler@{ req ->
 
@@ -43,23 +119,27 @@ val certHandler: HttpHandler = certHandler@{ req ->
         req.form("password")
             ?: return@certHandler Response(Status.BAD_REQUEST).body("Missing password")
 
-    val keyPair = generateKeyPair()
-    val cert = generateCertificate(cn, keyPair, days)
+//    val keyPair = generateKeyPair()
+//    val cert = generateCertificate(cn, keyPair, days)
+//
+//    val jksBytes = createKeystore(keyPair.private, cert, password)
+//    val jksB64 = Base64.getEncoder().encodeToString(jksBytes)
+//
+//    File("/tmp/jks").writeText("jksBytes size: " + jksBytes.size + "\n" + jksB64)
+//    File("/tmp/cert").writeText(cert.encoded.toString(Charsets.UTF_8))
 
-    val jksBytes = createKeystore(keyPair.private, cert, password)
-    val jksB64 = Base64.getEncoder().encodeToString(jksBytes)
-
-    File("/tmp/jks").writeText("jksBytes size: " + jksBytes.size + "\n" + jksB64)
-    File("/tmp/cert").writeText(cert.encoded.toString(Charsets.UTF_8))
+    val meta = generateAndStoreCert(cn, days, password)
 
     Response(Status.OK)
-        .header("Content-Type", "application/x-x509-ca-cert")
-        .header(
-            "Content-Disposition",
-            "attachment; filename=\"salesforce-jwt.cer\"",
-        ).header("X-KEYSTORE-JKS-B64", jksB64)
-        .header("X-KEYSTORE-PASSWORD", password)
-        .body(cert.encoded.inputStream())
+        .header("Content-Type", "application/json")
+        .body(
+            """
+            {
+              "cn": "${meta.cn}",
+              "expiresAt": "${meta.expiresAt}"
+            }
+            """.trimIndent(),
+        )
 }
 
 private fun generateKeyPair(): KeyPair =
