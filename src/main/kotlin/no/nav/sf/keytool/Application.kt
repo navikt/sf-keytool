@@ -5,6 +5,7 @@ import no.nav.sf.keytool.cert.baseDir
 import no.nav.sf.keytool.cert.certHandler
 import no.nav.sf.keytool.cert.downloadHandler
 import no.nav.sf.keytool.cert.listCerts
+import no.nav.sf.keytool.cert.testCertHandler
 import no.nav.sf.keytool.token.AuthRouteBuilder
 import no.nav.sf.keytool.token.DefaultAccessTokenHandler
 import no.nav.sf.keytool.token.DefaultTokenValidator
@@ -34,7 +35,14 @@ class Application {
 
     val cluster = if (local) "local" else env(env_NAIS_CLUSTER_NAME)
 
-    val accessTokenHandler = DefaultAccessTokenHandler()
+    val accessTokenHandler =
+        DefaultAccessTokenHandler(
+            sfTokenHost = env(config_SF_TOKENHOST),
+            sfClientId = env(secret_SF_CLIENT_ID),
+            sfUsername = env(secret_SF_USERNAME),
+            keystoreJksB64 = env(secret_KEYSTORE_JKS_B64),
+            keystorePassword = env(secret_KEYSTORE_PASSWORD),
+        )
 
     fun apiServer(port: Int): Http4kServer = api().asServer(Netty(port))
 
@@ -80,6 +88,7 @@ class Application {
                 val file = req.path("file")!!
                 downloadHandler(cn, file)
             },
+            "/internal/cert/test" bind Method.POST to testCertHandler,
         )
 
     /**

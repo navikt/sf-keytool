@@ -2,6 +2,9 @@
 
 package no.nav.sf.keytool.cert
 
+import no.nav.sf.keytool.config_SF_TOKENHOST
+import no.nav.sf.keytool.env
+import no.nav.sf.keytool.token.DefaultAccessTokenHandler
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
@@ -204,3 +207,31 @@ private fun createKeystore(
         }
         out.toByteArray()
     }
+
+val testCertHandler: HttpHandler = testCertHandler@{ req ->
+    val cn = req.query("cn") ?: return@testCertHandler Response(Status.BAD_REQUEST)
+    val clientId = req.query("clientId") ?: return@testCertHandler Response(Status.BAD_REQUEST)
+    val username = req.query("username") ?: return@testCertHandler Response(Status.BAD_REQUEST)
+
+    val dir = File(baseDir, cn)
+    if (!dir.exists()) return@testCertHandler Response(Status.NOT_FOUND)
+
+    val jksB64 = File(dir, "$cn.jks.b64").readText()
+    val password = File(dir, "password.txt").readText()
+
+    val handler =
+        DefaultAccessTokenHandler(
+            sfTokenHost = env(config_SF_TOKENHOST),
+            sfClientId = clientId,
+            sfUsername = username,
+            keystoreJksB64 = jksB64,
+            keystorePassword = password,
+        )
+
+    try {
+        val token = handler.accessToken
+        Response(Status.OK).body("SUCCESS\nInstance: ${handler.instanceUrl}")
+    } catch (e: Exception) {
+        Response(Status.BAD_REQUEST).body("FAILED\n${e.message}")
+    }
+}

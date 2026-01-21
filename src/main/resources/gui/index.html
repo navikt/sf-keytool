@@ -5,9 +5,9 @@
     <title>Salesforce JWT Certificate Tool</title>
     <style>
         body { font-family: sans-serif; margin: 2em; }
-        input { margin: 0.3em 0; }
+        input { margin: 0.3em 0; width: 100%; }
         button { margin-top: 0.5em; }
-        table { border-collapse: collapse; margin-top: 1em; }
+        table { border-collapse: collapse; margin-top: 1em; width: 100%; }
         th, td { border: 1px solid #ccc; padding: 0.4em 0.6em; }
         th { background: #f3f3f3; }
         .warn { color: darkred; }
@@ -18,6 +18,27 @@
             font-size: 1.1em;
             margin-right: 0.4em;
         }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background: #fff;
+            max-width: 420px;
+            margin: 10% auto;
+            padding: 1em;
+            border-radius: 4px;
+        }
+        .modal-actions {
+            margin-top: 1em;
+            text-align: right;
+        }
+        .success { color: green; }
+        .error { color: darkred; white-space: pre-wrap; }
     </style>
 </head>
 <body>
@@ -57,7 +78,38 @@
     <tbody id="certTable"></tbody>
 </table>
 
+<!-- Test Modal -->
+<div id="testModal" class="modal">
+    <div class="modal-content">
+        <h3>Test certificate</h3>
+
+        <div>
+            CN:
+            <input id="testCn" readonly />
+        </div>
+
+        <div>
+            Salesforce Client ID:
+            <input id="testClientId" />
+        </div>
+
+        <div>
+            Salesforce Username:
+            <input id="testUsername" />
+        </div>
+
+        <div id="testResult"></div>
+
+        <div class="modal-actions">
+            <button onclick="runTest()">Test</button>
+            <button onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    let currentTestCn = null;
+
     async function loadCerts() {
         const res = await fetch("/internal/cert/list");
         const list = await res.json();
@@ -70,20 +122,23 @@
             const warn = c.daysLeft < 60 ? "warn" : "";
 
             tr.innerHTML = `
-      <td>${c.cn}</td>
-      <td>${c.expiresAt}</td>
-      <td class="${warn}">${c.daysLeft}</td>
-      <td>
-        <button class="icon-btn" title="Download .cer"
-          onclick="download('${c.cn}', 'cer')">⬇️</button>
+            <td>${c.cn}</td>
+            <td>${c.expiresAt}</td>
+            <td class="${warn}">${c.daysLeft}</td>
+            <td>
+                <button class="icon-btn" title="Download .cer"
+                    onclick="download('${c.cn}', 'cer')">⬇️</button>
 
-        <button class="icon-btn" title="Copy JKS Base64"
-          onclick="copy('${c.cn}', 'jksb64')">📋 JKS</button>
+                <button class="icon-btn" title="Copy JKS Base64"
+                    onclick="copy('${c.cn}', 'jksb64')">📋 JKS</button>
 
-        <button class="icon-btn" title="Copy password"
-          onclick="copy('${c.cn}', 'password')">📋 pwd</button>
-      </td>
-    `;
+                <button class="icon-btn" title="Copy password"
+                    onclick="copy('${c.cn}', 'password')">📋 pwd</button>
+
+                <button class="icon-btn" title="Test against Salesforce"
+                    onclick="openTestModal('${c.cn}')">🧪</button>
+            </td>
+        `;
             tbody.appendChild(tr);
         });
     }
@@ -98,6 +153,46 @@
         await navigator.clipboard.writeText(text);
         alert("Copied to clipboard");
     }
+
+    /* ----- Modal ----- */
+
+    function openTestModal(cn) {
+        currentTestCn = cn;
+        document.getElementById("testCn").value = cn;
+        document.getElementById("testResult").innerHTML = "";
+        document.getElementById("testModal").style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById("testModal").style.display = "none";
+    }
+
+    async function runTest() {
+        const clientId = document.getElementById("testClientId").value;
+        const username = document.getElementById("testUsername").value;
+
+        const result = document.getElementById("testResult");
+        result.textContent = "Testing...";
+        result.className = "";
+
+        const body = new URLSearchParams({
+            cn: currentTestCn,
+            clientId,
+            username
+        });
+
+        const res = await fetch("/internal/cert/test", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body
+        });
+
+        const text = await res.text();
+        result.textContent = text;
+        result.className = res.ok ? "success" : "error";
+    }
+
+    /* ----- Generate ----- */
 
     document.getElementById("generateForm").onsubmit = async e => {
         e.preventDefault();
