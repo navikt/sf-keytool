@@ -104,7 +104,7 @@ class Application {
 
     fun start() {
         installBouncyCastle()
-        baseDir.mkdirs()
+        // baseDir.mkdirs()
         log.info { "Starting in cluster $cluster" }
         apiServer(8080).start()
     }

@@ -209,12 +209,27 @@ private fun createKeystore(
     }
 
 val testCertHandler: HttpHandler = testCertHandler@{ req ->
-    File(
-        "/tmp/entry",
-    ).writeText((req.query("cn") ?: "null") + "," + (req.query("clientId") ?: "null") + "," + (req.query("username") ?: "null"))
-    val cn = req.query("cn") ?: return@testCertHandler Response(Status.BAD_REQUEST)
-    val clientId = req.query("clientId") ?: return@testCertHandler Response(Status.BAD_REQUEST)
-    val username = req.query("username") ?: return@testCertHandler Response(Status.BAD_REQUEST)
+    if (req.method != Method.POST) {
+        return@testCertHandler Response(Status.METHOD_NOT_ALLOWED)
+    }
+
+    val cn =
+        req.form("cn")
+            ?: return@testCertHandler Response(Status.BAD_REQUEST)
+                .body("Missing cn")
+
+    val clientId =
+        req.form("clientId")
+            ?: return@testCertHandler Response(Status.BAD_REQUEST)
+                .body("Missing clientId")
+
+    val username =
+        req.form("username")
+            ?: return@testCertHandler Response(Status.BAD_REQUEST)
+                .body("Missing username")
+
+    // Debug (optional)
+    File("/tmp/entry").writeText("$cn,$clientId,$username")
 
     val dir = File(baseDir, cn)
     if (!dir.exists()) return@testCertHandler Response(Status.NOT_FOUND)
