@@ -11,6 +11,13 @@
         th, td { border: 1px solid #ccc; padding: 0.4em 0.6em; }
         th { background: #f3f3f3; }
         .warn { color: darkred; }
+        .icon-btn {
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1.1em;
+            margin-right: 0.4em;
+        }
     </style>
 </head>
 <body>
@@ -19,7 +26,7 @@
 
 <form id="generateForm">
     <div>
-        CN (certificate name):
+        CN:
         <input name="cn" required placeholder="salesforce-prod" />
     </div>
     <div>
@@ -30,16 +37,15 @@
         Keystore password:
         <input name="password" type="password" required />
     </div>
-    <button type="submit">Generate certificate</button>
+    <button type="submit">Generate</button>
 </form>
 
 <hr/>
 
 <h2>Existing certificates</h2>
+<button onclick="loadCerts()">Refresh</button>
 
-<button onclick="loadCerts()">Refresh list</button>
-
-<table id="certTable">
+<table>
     <thead>
     <tr>
         <th>CN</th>
@@ -48,7 +54,7 @@
         <th>Actions</th>
     </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="certTable"></tbody>
 </table>
 
 <script>
@@ -56,28 +62,41 @@
         const res = await fetch("/internal/cert/list");
         const list = await res.json();
 
-        const tbody = document.querySelector("#certTable tbody");
+        const tbody = document.getElementById("certTable");
         tbody.innerHTML = "";
 
         list.forEach(c => {
             const tr = document.createElement("tr");
-
-            const daysClass = c.daysLeft < 60 ? "warn" : "";
+            const warn = c.daysLeft < 60 ? "warn" : "";
 
             tr.innerHTML = `
       <td>${c.cn}</td>
       <td>${c.expiresAt}</td>
-      <td class="${daysClass}">${c.daysLeft}</td>
+      <td class="${warn}">${c.daysLeft}</td>
       <td>
-        <a href="/internal/cert/download/${c.cn}/cer">.cer</a>
-        |
-        <a href="/internal/cert/download/${c.cn}/jks">.jks</a>
-        |
-        <a href="/internal/cert/download/${c.cn}/password" target="_blank">password</a>
+        <button class="icon-btn" title="Download .cer"
+          onclick="download('${c.cn}', 'cer')">⬇️</button>
+
+        <button class="icon-btn" title="Copy JKS Base64"
+          onclick="copy('${c.cn}', 'jksb64')">📋 JKS</button>
+
+        <button class="icon-btn" title="Copy password"
+          onclick="copy('${c.cn}', 'password')">📋 pwd</button>
       </td>
     `;
             tbody.appendChild(tr);
         });
+    }
+
+    function download(cn, type) {
+        window.location = `/internal/cert/download/${cn}/${type}`;
+    }
+
+    async function copy(cn, type) {
+        const res = await fetch(`/internal/cert/download/${cn}/${type}`);
+        const text = await res.text();
+        await navigator.clipboard.writeText(text);
+        alert("Copied to clipboard");
     }
 
     document.getElementById("generateForm").onsubmit = async e => {

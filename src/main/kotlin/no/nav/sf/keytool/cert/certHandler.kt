@@ -47,9 +47,11 @@ fun generateAndStoreCert(
     val keyPair = generateKeyPair()
     val cert = generateCertificate(cn, keyPair, days)
     val jksBytes = createKeystore(keyPair.private, cert, password)
+    val jksB64 = Base64.getEncoder().encodeToString(jksBytes)
 
     File(dir, "$cn.cer").writeBytes(cert.encoded)
     File(dir, "$cn.jks").writeBytes(jksBytes)
+    File(dir, "$cn.jks.b64").writeText(jksB64)
     File(dir, "password.txt").writeText(password)
 
     val expiresAt = cert.notAfter.toInstant()
@@ -90,6 +92,7 @@ fun downloadHandler(
         when (file) {
             "cer" -> File(dir, "$cn.cer")
             "jks" -> File(dir, "$cn.jks")
+            "jksb64" -> File(dir, "$cn.jks.b64")
             "password" -> File(dir, "password.txt")
             else -> return Response(Status.BAD_REQUEST)
         }
