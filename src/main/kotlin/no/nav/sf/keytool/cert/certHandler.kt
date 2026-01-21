@@ -209,6 +209,9 @@ private fun createKeystore(
     }
 
 val testCertHandler: HttpHandler = testCertHandler@{ req ->
+    File(
+        "/tmp/entry",
+    ).writeText((req.query("cn") ?: "null") + "," + (req.query("clientId") ?: "null") + "," + (req.query("username") ?: "null"))
     val cn = req.query("cn") ?: return@testCertHandler Response(Status.BAD_REQUEST)
     val clientId = req.query("clientId") ?: return@testCertHandler Response(Status.BAD_REQUEST)
     val username = req.query("username") ?: return@testCertHandler Response(Status.BAD_REQUEST)
