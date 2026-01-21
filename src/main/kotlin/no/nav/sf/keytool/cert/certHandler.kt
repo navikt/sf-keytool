@@ -15,6 +15,7 @@ import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.body.form
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.math.BigInteger
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -47,6 +48,9 @@ val certHandler: HttpHandler = certHandler@{ req ->
 
     val jksBytes = createKeystore(keyPair.private, cert, password)
     val jksB64 = Base64.getEncoder().encodeToString(jksBytes)
+
+    File("/tmp/jks").writeText("jksBytes size: " + jksBytes.size + "\n" + jksB64)
+    File("/tmp/cert").writeText(cert.encoded.toString(Charsets.UTF_8))
 
     Response(Status.OK)
         .header("Content-Type", "application/x-x509-ca-cert")
