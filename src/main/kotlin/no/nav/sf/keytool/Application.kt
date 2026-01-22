@@ -7,6 +7,7 @@ import no.nav.sf.keytool.cert.certHandler
 import no.nav.sf.keytool.cert.downloadHandler
 import no.nav.sf.keytool.cert.listCerts
 import no.nav.sf.keytool.cert.testCertHandler
+import no.nav.sf.keytool.db.PostgresDatabase
 import no.nav.sf.keytool.token.AuthRouteBuilder
 import no.nav.sf.keytool.token.DefaultAccessTokenHandler
 import no.nav.sf.keytool.token.DefaultTokenValidator
@@ -32,6 +33,8 @@ class Application {
     private val log = KotlinLogging.logger { }
 
     val local: Boolean = System.getenv(env_NAIS_CLUSTER_NAME) == null
+
+    val context = env(config_CONTEXT)
 
     val tokenValidator = if (local) MockTokenValidator() else DefaultTokenValidator()
 
@@ -83,6 +86,8 @@ class Application {
                 downloadHandler(cn, file)
             },
             "/internal/cert/test" bind Method.POST to testCertHandler,
+            "/internal/clearDb" bind Method.GET to clearDbHandler,
+            "/internal/initDb" bind Method.GET to initDbHandler,
         )
 
     /**
@@ -98,8 +103,17 @@ class Application {
 
     fun start() {
         installBouncyCastle()
-        // baseDir.mkdirs()
         log.info { "Starting in cluster $cluster" }
         apiServer(8080).start()
+    }
+
+    private val clearDbHandler: HttpHandler = {
+        PostgresDatabase.createCertMetadataTable(true)
+        Response(OK).body("Table recreated")
+    }
+
+    private val initDbHandler: HttpHandler = {
+        PostgresDatabase.createCertMetadataTable(true)
+        Response(OK).body("Table created")
     }
 }

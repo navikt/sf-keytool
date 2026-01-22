@@ -218,6 +218,7 @@
         const text = await res.text();
         result.textContent = text;
         result.className = res.ok ? "success" : "error";
+        await loadCerts();
     }
 
     /* ----- Generate ----- */

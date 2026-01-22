@@ -28,6 +28,11 @@ spec:
     requests:
       cpu: 10m
       memory: 512Mi
+  sqlInstances:
+    - type: POSTGRES_17
+      tier: db-f1-micro
+      databases:
+        - name: sf-keytool-dev
   ingresses:
     - "https://sf-keytool.intern.dev.nav.no"
   azure:
@@ -50,5 +55,5 @@ spec:
   envFrom:
     - secret: sf-pubsub-preprod
   env:
-    - name: AN_ENV
-      value: "a value in dev"
+    - name: CONTEXT
+      value: "DEV"

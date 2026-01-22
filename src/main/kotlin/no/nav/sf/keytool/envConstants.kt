@@ -9,6 +9,7 @@ const val env_AZURE_OPENID_CONFIG_TOKEN_ENDPOINT = "AZURE_OPENID_CONFIG_TOKEN_EN
 
 const val env_NAIS_CLUSTER_NAME = "NAIS_CLUSTER_NAME"
 
+const val config_CONTEXT = "CONTEXT"
 const val config_SF_TOKENHOST = "SF_TOKENHOST"
 
 const val secret_SF_CLIENT_ID = "SF_CLIENT_ID"
