@@ -81,10 +81,15 @@
         <th>Verify</th>
         <th>SF_CLIENT_ID</th>
         <th>SF_USERNAME</th>
+        <th></th>
     </tr>
     </thead>
     <tbody id="certTable"></tbody>
 </table>
+
+<button onclick="flushLocal()" style="margin-top: 1em;">
+    🧹 Flush local certificate cache
+</button>
 
 <!-- Test Modal -->
 <div id="testModal" class="modal">
@@ -179,6 +184,10 @@
                             : `<span title="Integration user">${c.sfUsername}</span>`
             }
       </td>
+      <td>
+  <button class="icon-btn" title="Delete certificate"
+    onclick="deleteCert('${c.cn}', '${c.source}')">🗑</button>
+</td>
 `;
             tbody.appendChild(tr);
         });
@@ -238,6 +247,48 @@
         result.className = res.ok ? "success" : "error";
         await loadCerts();
     }
+
+    async function deleteCert(cn, source) {
+        if (!confirm(`Delete certificate '${cn}'?\n\nThis cannot be undone.`)) {
+            return;
+        }
+
+        const body = new URLSearchParams({ cn, source });
+
+        const res = await fetch("/internal/cert/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body
+        });
+
+        if (!res.ok) {
+            alert(await res.text());
+            return;
+        }
+
+        loadCerts();
+    }
+
+    async function flushLocal() {
+        if (!confirm(
+            "This will remove ALL locally stored certificates and secrets.\n\n" +
+            "Database metadata will remain.\n\nContinue?"
+        )) {
+            return;
+        }
+
+        const res = await fetch("/internal/cert/flush", {
+            method: "POST"
+        });
+
+        if (!res.ok) {
+            alert(await res.text());
+            return;
+        }
+
+        loadCerts();
+    }
+
 
     /* ----- Generate ----- */
 

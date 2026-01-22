@@ -315,3 +315,31 @@ fun readCertificate(
             .getInstance("X.509")
             .generateCertificate(input) as X509Certificate
     }
+
+val deleteCertHandler: HttpHandler = deleteCertHandler@{ req ->
+    val cn =
+        req.form("cn")
+            ?: return@deleteCertHandler Response(Status.BAD_REQUEST).body("Missing cn")
+
+    val source =
+        req.form("source")
+            ?: return@deleteCertHandler Response(Status.BAD_REQUEST).body("Missing source")
+
+    val dir = File(baseDir, cn)
+    if (dir.exists()) {
+        dir.deleteRecursively()
+    }
+
+    if (source == "DB") {
+        PostgresDatabase.deleteCertMetadata(cn)
+    }
+
+    Response(Status.OK).body("Deleted $cn")
+}
+
+val flushLocalHandler: HttpHandler = {
+    baseDir.listFiles()?.forEach {
+        it.deleteRecursively()
+    }
+    Response(Status.OK).body("Local cert cache flushed")
+}

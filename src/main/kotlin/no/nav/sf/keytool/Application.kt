@@ -4,7 +4,9 @@ import com.google.gson.Gson
 import mu.KotlinLogging
 import no.nav.sf.keytool.cert.baseDir
 import no.nav.sf.keytool.cert.certHandler
+import no.nav.sf.keytool.cert.deleteCertHandler
 import no.nav.sf.keytool.cert.downloadHandler
+import no.nav.sf.keytool.cert.flushLocalHandler
 import no.nav.sf.keytool.cert.listAllCerts
 import no.nav.sf.keytool.cert.testCertHandler
 import no.nav.sf.keytool.db.PostgresDatabase
@@ -88,6 +90,8 @@ class Application {
                 downloadHandler(cn, file)
             },
             "/internal/cert/test" bind Method.POST to testCertHandler,
+            "/internal/cert/delete" bind Method.POST to deleteCertHandler,
+            "/internal/cert/flush" bind Method.POST to flushLocalHandler,
             "/internal/clearDb" bind Method.GET to clearDbHandler,
             "/internal/initDb" bind Method.GET to initDbHandler,
         )
