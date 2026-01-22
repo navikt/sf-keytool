@@ -61,6 +61,7 @@ object PostgresDatabase {
                 keys = arrayOf(CertMetadataTable.cn), // Perform update if there is a conflict here
             ) {
                 it[CertMetadataTable.cn] = certMetadata.cn
+                it[CertMetadataTable.expiresAt] = certMetadata.expiresAt
                 it[CertMetadataTable.sfUsername] = certMetadata.sfUsername
                 it[CertMetadataTable.sfClientId] = certMetadata.sfClientId
             }
@@ -74,7 +75,7 @@ object PostgresDatabase {
         }
     }
 
-    private fun retrieveCertMetadata(): List<CertMetadata> =
+    fun retrieveCertMetadata(): List<CertMetadata> =
         transaction {
             CertMetadataTable
                 .selectAll()

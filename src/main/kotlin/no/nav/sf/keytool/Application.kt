@@ -5,7 +5,7 @@ import mu.KotlinLogging
 import no.nav.sf.keytool.cert.baseDir
 import no.nav.sf.keytool.cert.certHandler
 import no.nav.sf.keytool.cert.downloadHandler
-import no.nav.sf.keytool.cert.listCerts
+import no.nav.sf.keytool.cert.listAllCerts
 import no.nav.sf.keytool.cert.testCertHandler
 import no.nav.sf.keytool.db.PostgresDatabase
 import no.nav.sf.keytool.token.AuthRouteBuilder
@@ -25,6 +25,7 @@ import org.http4k.routing.static
 import org.http4k.server.Http4kServer
 import org.http4k.server.Netty
 import org.http4k.server.asServer
+import java.io.File
 import java.security.Security
 import java.time.Duration
 import java.time.Instant
@@ -65,13 +66,14 @@ class Application {
             // List existing certs
             "/internal/cert/list" bind Method.GET to {
                 val payload =
-                    listCerts().map {
+                    listAllCerts().map {
                         mapOf(
                             "cn" to it.cn,
                             "expiresAt" to it.expiresAt.toString(),
                             "daysLeft" to Duration.between(Instant.now(), it.expiresAt).toDays(),
                             "sfClientId" to it.sfClientId,
                             "sfUsername" to it.sfUsername,
+                            "source" to if (File(baseDir, it.cn).exists()) "tmp" else "db",
                         )
                     }
 

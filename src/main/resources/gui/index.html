@@ -129,38 +129,56 @@
             const tr = document.createElement("tr");
             const warn = c.daysLeft < 60 ? "warn" : "";
 
+            const isTmp = c.source === "tmp";
+
             tr.innerHTML = `
   <td>${c.cn}</td>
   <td>${c.expiresAt}</td>
   <td class="${warn}">${c.daysLeft}</td>
 
-  <td>
-    <button class="icon-btn" title="Download certificate"
-      onclick="download('${c.cn}', 'cer')">⬇️</button>
-  </td>
+      <td>
+        ${isTmp
+                ? `<button class="icon-btn" title="Download certificate"
+                 onclick="download('${c.cn}', 'cer')">⬇️</button>`
+                : ``}
+      </td>
 
-  <td>
-    <button class="icon-btn" title="Copy JKS Base64"
-      onclick="copy('${c.cn}', 'jksb64')">📋</button>
-  </td>
+      <td>
+        ${isTmp
+                ? `<button class="icon-btn" title="Copy JKS Base64"
+                 onclick="copy('${c.cn}', 'jksb64')">📋</button>`
+                : ``}
+      </td>
 
-  <td>
-    <button class="icon-btn" title="Copy keystore password"
-      onclick="copy('${c.cn}', 'password')">📋</button>
-  </td>
+      <td>
+        ${isTmp
+                ? `<button class="icon-btn" title="Copy keystore password"
+                 onclick="copy('${c.cn}', 'password')">📋</button>`
+                : ``}
+      </td>
 
-  <td>
-    <button class="icon-btn" title="Verify against Salesforce"
-      onclick="openTestModal('${c.cn}')">🧪</button>
-  </td>
+      <td>
+        ${isTmp
+                ? `<button class="icon-btn" title="Verify against Salesforce"
+                 onclick="openTestModal('${c.cn}')">🧪</button>`
+                : ``}
+      </td>
 
-  <td id="sf-client-${c.cn}">
-    ${c.sfClientId ? `<button class="icon-btn" onclick="copyValue('${c.sfClientId}')">📋</button>` : ""}
-  </td>
+      <td>
+        ${isTmp
+                ? `<button class="icon-btn" title="Copy SF Client ID"
+               onclick="copyValue('${c.sfClientId}')">📋</button>`
+                            : `<span title="Masked Client ID">${c.sfClientId}</span>`
+            }
+      </td>
 
-  <td id="sf-user-${c.cn}">
-    ${c.sfUsername ? `<button class="icon-btn" onclick="copyValue('${c.sfUsername}')">📋</button>` : ""}
-  </td>
+      <td>
+        ${isTmp
+                ? `<button class="icon-btn" title="Copy SF Username"
+               onclick="copyValue('${c.sfUsername}')">📋</button>`
+                            : `<span title="Integration user">${c.sfUsername}</span>`
+            }
+      </td>
 `;
             tbody.appendChild(tr);
         });

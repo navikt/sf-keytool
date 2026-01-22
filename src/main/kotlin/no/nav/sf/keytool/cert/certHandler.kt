@@ -3,6 +3,7 @@
 package no.nav.sf.keytool.cert
 
 import no.nav.sf.keytool.config_SF_TOKENHOST
+import no.nav.sf.keytool.db.PostgresDatabase
 import no.nav.sf.keytool.env
 import no.nav.sf.keytool.token.DefaultAccessTokenHandler
 import org.bouncycastle.asn1.x500.X500Name
@@ -26,6 +27,7 @@ import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.SecureRandom
 import java.security.Security
+import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.time.Instant
 import java.util.Base64
@@ -72,7 +74,7 @@ fun generateAndStoreCert(
     return CertMetadata(cn, expiresAt, null, null)
 }
 
-fun listCerts(): List<CertMetadata> =
+fun listTmpCerts(): List<CertMetadata> =
     baseDir.listFiles()?.mapNotNull { dir ->
         val meta = File(dir, "metadata.json")
         if (!meta.exists()) return@mapNotNull null
@@ -82,19 +84,39 @@ fun listCerts(): List<CertMetadata> =
                 .find(meta.readText())!!
                 .groupValues[1]
 
-        val sfClientId =
-            File(dir, "sf_client_id.txt").takeIf { it.exists() }?.readText()
+        val sfClientIdMasked =
+            File(dir, "sf_client_id.txt")
+                .takeIf { it.exists() }
+                ?.readText()
+                ?.let(::maskClientId)
 
         val sfUsername =
-            File(dir, "sf_username.txt").takeIf { it.exists() }?.readText()
+            File(dir, "sf_username.txt")
+                .takeIf { it.exists() }
+                ?.readText()
 
         CertMetadata(
             cn = dir.name,
             expiresAt = Instant.parse(expiresAt),
-            sfClientId = sfClientId,
+            sfClientId = sfClientIdMasked,
             sfUsername = sfUsername,
         )
     } ?: emptyList()
+
+fun listDbCerts(): List<CertMetadata> = PostgresDatabase.retrieveCertMetadata()
+
+fun listAllCerts(): List<CertMetadata> {
+    val tmp = listTmpCerts()
+    val db = listDbCerts()
+
+    val tmpByCn = tmp.associateBy { it.cn }
+
+    val merged =
+        tmp +
+            db
+                .filterNot { it.cn in tmpByCn }
+    return merged.sortedBy { it.cn }
+}
 
 fun downloadHandler(
     cn: String,
@@ -248,6 +270,8 @@ val testCertHandler: HttpHandler = testCertHandler@{ req ->
 
     val jksB64 = File(dir, "$cn.jks.b64").readText()
     val password = File(dir, "password.txt").readText()
+    val cert = readCertificate(dir, cn)
+    val expiresAt = cert.notAfter.toInstant()
 
     val handler =
         DefaultAccessTokenHandler(
@@ -262,8 +286,33 @@ val testCertHandler: HttpHandler = testCertHandler@{ req ->
         val token = handler.accessToken
         File(dir, "sf_client_id.txt").writeText(clientId)
         File(dir, "sf_username.txt").writeText(username)
+        PostgresDatabase.upsertCertMetadata(
+            CertMetadata(
+                cn = cn,
+                expiresAt = expiresAt,
+                sfUsername = username,
+                sfClientId = maskClientId(clientId),
+            ),
+        )
         Response(Status.OK).body("SUCCESS\nInstance: ${handler.instanceUrl}")
     } catch (e: Exception) {
         Response(Status.BAD_REQUEST).body("FAILED\n${e.message}")
     }
 }
+
+fun maskClientId(clientId: String): String =
+    if (clientId.length <= 10) {
+        "***"
+    } else {
+        "***" + clientId.takeLast(10)
+    }
+
+fun readCertificate(
+    dir: File,
+    cn: String,
+): X509Certificate =
+    File(dir, "$cn.cer").inputStream().use { input ->
+        CertificateFactory
+            .getInstance("X.509")
+            .generateCertificate(input) as X509Certificate
+    }
