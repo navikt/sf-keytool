@@ -330,7 +330,7 @@ val deleteCertHandler: HttpHandler = deleteCertHandler@{ req ->
         dir.deleteRecursively()
     }
 
-    if (source == "DB") {
+    if (source == "db") {
         PostgresDatabase.deleteCertMetadata(cn)
     }
 
