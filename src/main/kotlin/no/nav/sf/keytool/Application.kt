@@ -113,7 +113,7 @@ class Application {
     }
 
     private val initDbHandler: HttpHandler = {
-        PostgresDatabase.createCertMetadataTable(true)
+        PostgresDatabase.createCertMetadataTable(false)
         Response(OK).body("Table created")
     }
 }
