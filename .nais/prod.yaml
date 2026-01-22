@@ -28,11 +28,12 @@ spec:
     requests:
       cpu: 10m
       memory: 512Mi
-  sqlInstances:
-    - type: POSTGRES_17
-      tier: db-f1-micro
-      databases:
-        - name: sf-keytool-prod
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_17
+        tier: db-f1-micro
+        databases:
+          - name: sf-keytool-prod
   #  ingresses:
   #    - "https://sf-mellomvare.template.intern.nav.no"
   #  azure:
