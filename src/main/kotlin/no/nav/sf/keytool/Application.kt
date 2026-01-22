@@ -1,5 +1,6 @@
 package no.nav.sf.keytool
 
+import com.google.gson.Gson
 import mu.KotlinLogging
 import no.nav.sf.keytool.cert.baseDir
 import no.nav.sf.keytool.cert.certHandler
@@ -24,6 +25,7 @@ import org.http4k.server.Http4kServer
 import org.http4k.server.Netty
 import org.http4k.server.asServer
 import java.security.Security
+import java.time.Duration
 import java.time.Instant
 
 class Application {
@@ -58,29 +60,21 @@ class Application {
             // Generate + store cert under /tmp/sf-certs/{cn}
             "/internal/cert/generate" bind Method.POST to certHandler,
             // List existing certs
-            "/internal/cert/list" bind Method.GET to { _ ->
-                val list = listCerts()
+            "/internal/cert/list" bind Method.GET to {
+                val payload =
+                    listCerts().map {
+                        mapOf(
+                            "cn" to it.cn,
+                            "expiresAt" to it.expiresAt.toString(),
+                            "daysLeft" to Duration.between(Instant.now(), it.expiresAt).toDays(),
+                            "sfClientId" to it.sfClientId,
+                            "sfUsername" to it.sfUsername,
+                        )
+                    }
+
                 Response(OK)
                     .header("Content-Type", "application/json")
-                    .body(
-                        list.joinToString(
-                            prefix = "[",
-                            postfix = "]",
-                        ) {
-                            """
-                            {
-                              "cn": "${it.cn}",
-                              "expiresAt": "${it.expiresAt}",
-                              "daysLeft": ${
-                                java.time.Duration.between(
-                                    Instant.now(),
-                                    it.expiresAt,
-                                ).toDays()
-                            }
-                            }
-                            """.trimIndent()
-                        },
-                    )
+                    .body(Gson().toJson(payload))
             },
             // Download files: cer | jks | password
             "/internal/cert/download/{cn}/{file}" bind Method.GET to { req ->
