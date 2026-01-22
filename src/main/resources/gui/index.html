@@ -310,9 +310,9 @@
         document.getElementById("confirmModal").style.display = "block";
 
         document.getElementById("confirmOkButton").onclick = () => {
-            console.log("CONFIRM CLICKED");
+            const cb = confirmCallback;
             closeConfirmModal();
-            confirmCallback && confirmCallback();
+            cb && cb();
         };
     }
 
