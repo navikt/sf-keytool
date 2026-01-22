@@ -54,10 +54,6 @@
         Validity days:
         <input name="days" value="1200" />
     </div>
-    <div>
-        Keystore password:
-        <input name="password" type="password" required />
-    </div>
     <button type="submit">Generate</button>
     <div id="generateSpinner" style="display:none;">
         ⏳ Generating certificate…
@@ -116,6 +112,17 @@
         <div class="modal-actions">
             <button onclick="runTest()">Test</button>
             <button onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <h3 id="confirmTitle"></h3>
+        <p id="confirmMessage"></p>
+
+        <div class="modal-actions">
+            <button onclick="closeConfirmModal()">Cancel</button>
+            <button id="confirmOkButton">Confirm</button>
         </div>
     </div>
 </div>
@@ -248,45 +255,68 @@
         await loadCerts();
     }
 
-    async function deleteCert(cn, source) {
-        if (!confirm(`Delete certificate '${cn}'?\n\nThis cannot be undone.`)) {
-            return;
-        }
+    function deleteCert(cn, source) {
+        openConfirmModal(
+            "Delete certificate",
+            `Delete certificate '${cn}'?\n\nThis cannot be undone.`,
+            async () => {
+                const body = new URLSearchParams({ cn, source });
 
-        const body = new URLSearchParams({ cn, source });
+                const res = await fetch("/internal/cert/delete", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body
+                });
 
-        const res = await fetch("/internal/cert/delete", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body
-        });
+                if (!res.ok) {
+                    alert(await res.text());
+                    return;
+                }
 
-        if (!res.ok) {
-            alert(await res.text());
-            return;
-        }
-
-        loadCerts();
+                loadCerts();
+            }
+        );
     }
 
-    async function flushLocal() {
-        if (!confirm(
+    function flushLocal() {
+        openConfirmModal(
+            "Flush local certificate cache",
             "This will remove ALL locally stored certificates and secrets.\n\n" +
-            "Database metadata will remain.\n\nContinue?"
-        )) {
-            return;
-        }
+            "Database metadata will remain.",
+            async () => {
+                const res = await fetch("/internal/cert/flush", {
+                    method: "POST"
+                });
 
-        const res = await fetch("/internal/cert/flush", {
-            method: "POST"
-        });
+                if (!res.ok) {
+                    alert(await res.text());
+                    return;
+                }
 
-        if (!res.ok) {
-            alert(await res.text());
-            return;
-        }
+                loadCerts();
+            }
+        );
+    }
 
-        loadCerts();
+    let confirmCallback = null;
+
+    function openConfirmModal(title, message, onConfirm) {
+        document.getElementById("confirmTitle").innerText = title;
+        document.getElementById("confirmMessage").innerText = message;
+
+        confirmCallback = onConfirm;
+
+        document.getElementById("confirmModal").style.display = "block";
+
+        document.getElementById("confirmOkButton").onclick = () => {
+            closeConfirmModal();
+            confirmCallback && confirmCallback();
+        };
+    }
+
+    function closeConfirmModal() {
+        document.getElementById("confirmModal").style.display = "none";
+        confirmCallback = null;
     }
 
 
@@ -302,8 +332,7 @@
 
         const body = new URLSearchParams({
             cn: f.cn.value,
-            days: f.days.value,
-            password: f.password.value
+            days: f.days.value
         });
 
         try {

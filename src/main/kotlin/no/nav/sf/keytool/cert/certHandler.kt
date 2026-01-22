@@ -154,18 +154,7 @@ val certHandler: HttpHandler = certHandler@{ req ->
 
     val days = req.form("days")?.toIntOrNull() ?: 1200
 
-    val password =
-        req.form("password")
-            ?: return@certHandler Response(Status.BAD_REQUEST).body("Missing password")
-
-//    val keyPair = generateKeyPair()
-//    val cert = generateCertificate(cn, keyPair, days)
-//
-//    val jksBytes = createKeystore(keyPair.private, cert, password)
-//    val jksB64 = Base64.getEncoder().encodeToString(jksBytes)
-//
-//    File("/tmp/jks").writeText("jksBytes size: " + jksBytes.size + "\n" + jksB64)
-//    File("/tmp/cert").writeText(cert.encoded.toString(Charsets.UTF_8))
+    val password = generatePassword()
 
     val meta = generateAndStoreCert(cn, days, password)
 
@@ -343,3 +332,11 @@ val flushLocalHandler: HttpHandler = {
     }
     Response(Status.OK).body("Local cert cache flushed")
 }
+
+private fun generatePassword(bytes: Int = 24): String =
+    Base64
+        .getUrlEncoder()
+        .withoutPadding()
+        .encodeToString(
+            ByteArray(bytes).also { SecureRandom().nextBytes(it) },
+        )
