@@ -36,6 +36,8 @@ val baseDir = File("/tmp/sf-certs")
 data class CertMetadata(
     val cn: String,
     val expiresAt: Instant,
+    val sfClientId: String?,
+    val sfUsername: String?,
 )
 
 fun generateAndStoreCert(
@@ -67,21 +69,31 @@ fun generateAndStoreCert(
         """.trimIndent(),
     )
 
-    return CertMetadata(cn, expiresAt)
+    return CertMetadata(cn, expiresAt, null, null)
 }
 
 fun listCerts(): List<CertMetadata> =
     baseDir.listFiles()?.mapNotNull { dir ->
         val meta = File(dir, "metadata.json")
-        if (!meta.exists()) {
-            null
-        } else {
-            val expiresAt =
-                Regex("\"expiresAt\": \"(.*?)\"")
-                    .find(meta.readText())!!
-                    .groupValues[1]
-            CertMetadata(dir.name, Instant.parse(expiresAt))
-        }
+        if (!meta.exists()) return@mapNotNull null
+
+        val expiresAt =
+            Regex("\"expiresAt\": \"(.*?)\"")
+                .find(meta.readText())!!
+                .groupValues[1]
+
+        val sfClientId =
+            File(dir, "sf_client_id.txt").takeIf { it.exists() }?.readText()
+
+        val sfUsername =
+            File(dir, "sf_username.txt").takeIf { it.exists() }?.readText()
+
+        CertMetadata(
+            cn = dir.name,
+            expiresAt = Instant.parse(expiresAt),
+            sfClientId = sfClientId,
+            sfUsername = sfUsername,
+        )
     } ?: emptyList()
 
 fun downloadHandler(
@@ -248,6 +260,8 @@ val testCertHandler: HttpHandler = testCertHandler@{ req ->
 
     try {
         val token = handler.accessToken
+        File(dir, "sf_client_id.txt").writeText(clientId)
+        File(dir, "sf_username.txt").writeText(username)
         Response(Status.OK).body("SUCCESS\nInstance: ${handler.instanceUrl}")
     } catch (e: Exception) {
         Response(Status.BAD_REQUEST).body("FAILED\n${e.message}")

@@ -59,6 +59,9 @@
         <input name="password" type="password" required />
     </div>
     <button type="submit">Generate</button>
+    <div id="generateSpinner" style="display:none;">
+        ⏳ Generating certificate…
+    </div>
 </form>
 
 <hr/>
@@ -72,7 +75,12 @@
         <th>CN</th>
         <th>Expires</th>
         <th>Days left</th>
-        <th>Actions</th>
+        <th>Cert file</th>
+        <th>KEYSTORE_JKS_B64</th>
+        <th>KEYSTORE_PASSWORD</th>
+        <th>Verify</th>
+        <th>SF_CLIENT_ID</th>
+        <th>SF_USERNAME</th>
     </tr>
     </thead>
     <tbody id="certTable"></tbody>
@@ -122,25 +130,45 @@
             const warn = c.daysLeft < 60 ? "warn" : "";
 
             tr.innerHTML = `
-            <td>${c.cn}</td>
-            <td>${c.expiresAt}</td>
-            <td class="${warn}">${c.daysLeft}</td>
-            <td>
-                <button class="icon-btn" title="Download .cer"
-                    onclick="download('${c.cn}', 'cer')">⬇️</button>
+  <td>${c.cn}</td>
+  <td>${c.expiresAt}</td>
+  <td class="${warn}">${c.daysLeft}</td>
 
-                <button class="icon-btn" title="Copy JKS Base64"
-                    onclick="copy('${c.cn}', 'jksb64')">📋 JKS</button>
+  <td>
+    <button class="icon-btn" title="Download certificate"
+      onclick="download('${c.cn}', 'cer')">⬇️</button>
+  </td>
 
-                <button class="icon-btn" title="Copy password"
-                    onclick="copy('${c.cn}', 'password')">📋 pwd</button>
+  <td>
+    <button class="icon-btn" title="Copy JKS Base64"
+      onclick="copy('${c.cn}', 'jksb64')">📋</button>
+  </td>
 
-                <button class="icon-btn" title="Test against Salesforce"
-                    onclick="openTestModal('${c.cn}')">🧪</button>
-            </td>
-        `;
+  <td>
+    <button class="icon-btn" title="Copy keystore password"
+      onclick="copy('${c.cn}', 'password')">📋</button>
+  </td>
+
+  <td>
+    <button class="icon-btn" title="Verify against Salesforce"
+      onclick="openTestModal('${c.cn}')">🧪</button>
+  </td>
+
+  <td id="sf-client-${c.cn}">
+    ${c.sfClientId ? `<button class="icon-btn" onclick="copyValue('${c.sfClientId}')">📋</button>` : ""}
+  </td>
+
+  <td id="sf-user-${c.cn}">
+    ${c.sfUsername ? `<button class="icon-btn" onclick="copyValue('${c.sfUsername}')">📋</button>` : ""}
+  </td>
+`;
             tbody.appendChild(tr);
         });
+    }
+
+    function copyValue(value) {
+        navigator.clipboard.writeText(value);
+        alert("Copied to clipboard");
     }
 
     function download(cn, type) {
@@ -197,6 +225,10 @@
     document.getElementById("generateForm").onsubmit = async e => {
         e.preventDefault();
         const f = e.target;
+        const spinner = document.getElementById("generateSpinner");
+
+        spinner.style.display = "block";
+        f.querySelector("button").disabled = true;
 
         const body = new URLSearchParams({
             cn: f.cn.value,
@@ -204,19 +236,23 @@
             password: f.password.value
         });
 
-        const res = await fetch("/internal/cert/generate", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body
-        });
+        try {
+            const res = await fetch("/internal/cert/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body
+            });
 
-        if (!res.ok) {
-            alert(await res.text());
-            return;
+            if (!res.ok) {
+                alert(await res.text());
+            } else {
+                f.reset();
+                await loadCerts();
+            }
+        } finally {
+            spinner.style.display = "none";
+            f.querySelector("button").disabled = false;
         }
-
-        f.reset();
-        loadCerts();
     };
 
     loadCerts();
