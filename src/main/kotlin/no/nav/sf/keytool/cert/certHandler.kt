@@ -84,11 +84,10 @@ fun listTmpCerts(): List<CertMetadata> =
                 .find(meta.readText())!!
                 .groupValues[1]
 
-        val sfClientIdMasked =
+        val sfClientId =
             File(dir, "sf_client_id.txt")
                 .takeIf { it.exists() }
                 ?.readText()
-                ?.let(::maskClientId)
 
         val sfUsername =
             File(dir, "sf_username.txt")
@@ -98,7 +97,7 @@ fun listTmpCerts(): List<CertMetadata> =
         CertMetadata(
             cn = dir.name,
             expiresAt = Instant.parse(expiresAt),
-            sfClientId = sfClientIdMasked,
+            sfClientId = sfClientId,
             sfUsername = sfUsername,
         )
     } ?: emptyList()
