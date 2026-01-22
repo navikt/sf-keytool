@@ -121,8 +121,8 @@
         <p id="confirmMessage"></p>
 
         <div class="modal-actions">
-            <button onclick="closeConfirmModal()">Cancel</button>
-            <button id="confirmOkButton">Confirm</button>
+            <button type="button" onclick="closeConfirmModal()">Cancel</button>
+            <button type="button" id="confirmOkButton">Confirm</button>
         </div>
     </div>
 </div>
@@ -260,6 +260,7 @@
             "Delete certificate",
             `Delete certificate '${cn}'?\n\nThis cannot be undone.`,
             async () => {
+                console.log("DELETE CERT delegated function");
                 const body = new URLSearchParams({ cn, source });
 
                 const res = await fetch("/internal/cert/delete", {
@@ -273,7 +274,7 @@
                     return;
                 }
 
-                loadCerts();
+                await loadCerts();
             }
         );
     }
@@ -293,7 +294,7 @@
                     return;
                 }
 
-                loadCerts();
+                await loadCerts();
             }
         );
     }
@@ -309,6 +310,7 @@
         document.getElementById("confirmModal").style.display = "block";
 
         document.getElementById("confirmOkButton").onclick = () => {
+            console.log("CONFIRM CLICKED");
             closeConfirmModal();
             confirmCallback && confirmCallback();
         };
