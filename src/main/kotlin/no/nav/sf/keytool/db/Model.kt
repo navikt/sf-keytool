@@ -8,7 +8,7 @@ import org.jetbrains.exposed.sql.javatime.timestamp
 const val CERT_METADATA = "cert_metadata"
 
 object CertMetadataTable : Table(CERT_METADATA) {
-    val cn = varchar("cn", 255)
+    val cn = varchar("cn", 255).uniqueIndex()
     val expiresAt = timestamp("expires_at")
     val sfClientId = varchar("sf_client_id", 20).nullable()
     val sfUsername = varchar("sf_username", 255).nullable()
