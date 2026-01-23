@@ -126,6 +126,17 @@
         </div>
     </div>
 </div>
+<div id="toast" style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #333;
+    color: white;
+    padding: 0.6em 1em;
+    border-radius: 4px;
+    display: none;
+    z-index: 1000;
+">
 
 <script>
     let currentTestCn = null;
@@ -214,7 +225,7 @@
 
     function copyValue(value) {
         navigator.clipboard.writeText(value);
-        alert("Copied to clipboard");
+        showToast("Copied to clipboard");
     }
 
     function download(cn, type) {
@@ -225,7 +236,7 @@
         const res = await fetch(`/internal/cert/download/${cn}/${type}`);
         const text = await res.text();
         await navigator.clipboard.writeText(text);
-        alert("Copied to clipboard");
+        showToast("Copied to clipboard");
     }
 
     /* ----- Modal ----- */
@@ -239,6 +250,16 @@
 
     function closeModal() {
         document.getElementById("testModal").style.display = "none";
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.style.display = "block";
+
+        setTimeout(() => {
+            t.style.display = "none";
+        }, 1500);
     }
 
     async function runTest() {
@@ -282,7 +303,7 @@
                 });
 
                 if (!res.ok) {
-                    alert(await res.text());
+                    showToast(await res.text());
                     return;
                 }
 
@@ -302,7 +323,7 @@
                 });
 
                 if (!res.ok) {
-                    alert(await res.text());
+                    showToast(await res.text());
                     return;
                 }
 
@@ -343,7 +364,7 @@
         const cn = f.cn.value.trim();
 
         if (existingCns.has(cn)) {
-            alert(`Certificate with CN '${cn}' already exists`);
+            showToast(`Certificate with CN '${cn}' already exists`);
             return;
         }
 
@@ -363,7 +384,7 @@
             });
 
             if (!res.ok) {
-                alert(await res.text());
+                showToast(await res.text());
             } else {
                 f.reset();
                 await loadCerts();
