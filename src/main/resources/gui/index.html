@@ -129,6 +129,7 @@
 
 <script>
     let currentTestCn = null;
+    let existingCns = new Set();
 
     async function loadCerts() {
         const res = await fetch("/internal/cert/list");
@@ -137,7 +138,10 @@
         const tbody = document.getElementById("certTable");
         tbody.innerHTML = "";
 
+        existingCns.clear()
         list.forEach(c => {
+            existingCns.add(c.cn);
+
             const tr = document.createElement("tr");
             const warn = c.daysLeft < 60 ? "warn" : "";
 
@@ -177,20 +181,28 @@
       </td>
 
       <td>
-        ${isTmp
-                ? `<button class="icon-btn" title="Copy SF Client ID"
-               onclick="copyValue('${c.sfClientId}')">📋</button>`
-                            : `<span title="Masked Client ID">${c.sfClientId}</span>`
+  ${
+                isTmp && c.sfClientId
+                    ? `<button class="icon-btn"
+           title="Copy SF Client ID"
+           onclick="copyValue('${c.sfClientId}')">📋</button>`
+                    : (!isTmp && c.sfClientId
+                        ? `<span title="Masked Client ID">${c.sfClientId}</span>`
+                        : ``)
             }
-      </td>
+</td>
 
       <td>
-        ${isTmp
-                ? `<button class="icon-btn" title="Copy SF Username"
-               onclick="copyValue('${c.sfUsername}')">📋</button>`
-                            : `<span title="Integration user">${c.sfUsername}</span>`
+  ${
+                isTmp && c.sfUsername
+                    ? `<button class="icon-btn"
+           title="Copy SF Username"
+           onclick="copyValue('${c.sfUsername}')">📋</button>`
+                    : (!isTmp && c.sfUsername
+                        ? `<span title="Integration user">${c.sfUsername}</span>`
+                        : ``)
             }
-      </td>
+</td>
       <td>
   <button class="icon-btn" title="Delete certificate"
     onclick="deleteCert('${c.cn}', '${c.source}')">🗑</button>
@@ -328,12 +340,18 @@
         e.preventDefault();
         const f = e.target;
         const spinner = document.getElementById("generateSpinner");
+        const cn = f.cn.value.trim();
+
+        if (existingCns.has(cn)) {
+            alert(`Certificate with CN '${cn}' already exists`);
+            return;
+        }
 
         spinner.style.display = "block";
         f.querySelector("button").disabled = true;
 
         const body = new URLSearchParams({
-            cn: f.cn.value,
+            cn: cn,
             days: f.days.value
         });
 
