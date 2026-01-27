@@ -3,221 +3,140 @@
 <head>
     <meta charset="UTF-8" />
     <title>Salesforce JWT Certificate Tool</title>
-
-    <!-- Aksel CSS -->
-    <link
-            rel="stylesheet"
-            href="https://cdn.nav.no/aksel/aksel.css"
-    />
-
     <style>
-        body {
-            font-family: var(--a-font-family-default);
-            background: var(--a-bg-default);
-            margin: 0;
-            padding: var(--a-spacing-8);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section {
-            margin-bottom: var(--a-spacing-10);
-        }
-
-        .warn {
-            color: var(--a-text-danger);
-            font-weight: 600;
-        }
-
+        body { font-family: sans-serif; margin: 2em; }
+        input { margin: 0.3em 0; width: 100%; }
+        button { margin-top: 0.5em; }
+        table { border-collapse: collapse; margin-top: 1em; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 0.4em 0.6em; }
+        th { background: #f3f3f3; }
+        .warn { color: darkred; }
         .icon-btn {
-            background: none;
-            border: none;
             cursor: pointer;
-            font-size: 1.1rem;
+            border: none;
+            background: none;
+            font-size: 1.1em;
+            margin-right: 0.4em;
         }
 
-        /* Modal (Aksel-styled, men JS-styrt) */
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.4);
-            z-index: 1000;
         }
-
         .modal-content {
-            background: var(--a-surface-default);
-            max-width: 480px;
-            margin: 10vh auto;
-            padding: var(--a-spacing-6);
-            border-radius: var(--a-border-radius-large);
-            box-shadow: var(--a-shadow-large);
+            background: #fff;
+            max-width: 420px;
+            margin: 10% auto;
+            padding: 1em;
+            border-radius: 4px;
         }
-
         .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: var(--a-spacing-4);
-            margin-top: var(--a-spacing-6);
+            margin-top: 1em;
+            text-align: right;
         }
-
-        .success {
-            color: var(--a-text-success);
-            white-space: pre-wrap;
-        }
-
-        .error {
-            color: var(--a-text-danger);
-            white-space: pre-wrap;
-        }
-
-        /* Toast */
-        #toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--a-surface-inverted);
-            color: var(--a-text-on-inverted);
-            padding: var(--a-spacing-4) var(--a-spacing-6);
-            border-radius: var(--a-border-radius-medium);
-            display: none;
-            z-index: 2000;
-        }
+        .success { color: green; }
+        .error { color: darkred; white-space: pre-wrap; }
     </style>
 </head>
-
 <body>
-<div class="container">
 
-    <h1 class="navds-heading navds-heading--large section">
-        Salesforce JWT Certificate Tool
-    </h1>
+<h2>Generate Salesforce JWT Certificate</h2>
 
-    <!-- Generate -->
-    <section class="section">
-        <h2 class="navds-heading navds-heading--medium">Generate certificate</h2>
+<form id="generateForm">
+    <div>
+        CN:
+        <input name="cn" required placeholder="salesforce-prod" />
+    </div>
+    <div>
+        Validity days:
+        <input name="days" value="1200" />
+    </div>
+    <button type="submit">Generate</button>
+    <div id="generateSpinner" style="display:none;">
+        ⏳ Generating certificate…
+    </div>
+</form>
 
-        <form id="generateForm" class="navds-stack navds-stack--gap-6">
-            <div class="navds-form-field">
-                <label class="navds-label">CN</label>
-                <input
-                        class="navds-text-field__input"
-                        name="cn"
-                        required
-                        placeholder="salesforce-prod"
-                />
-            </div>
+<hr/>
 
-            <div class="navds-form-field">
-                <label class="navds-label">Validity days</label>
-                <input
-                        class="navds-text-field__input"
-                        name="days"
-                        value="1200"
-                />
-            </div>
+<h2>Existing certificates</h2>
+<button onclick="loadCerts()">Refresh</button>
 
-            <div>
-                <button type="submit" class="navds-button navds-button--primary">
-                    Generate
-                </button>
-            </div>
+<table>
+    <thead>
+    <tr>
+        <th>CN</th>
+        <th>Expires</th>
+        <th>Days left</th>
+        <th>Cert file</th>
+        <th>KEYSTORE_JKS_B64</th>
+        <th>KEYSTORE_PASSWORD</th>
+        <th>Verify</th>
+        <th>SF_CLIENT_ID</th>
+        <th>SF_USERNAME</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody id="certTable"></tbody>
+</table>
 
-            <div id="generateSpinner" style="display:none;">
-                ⏳ Generating certificate…
-            </div>
-        </form>
-    </section>
-
-    <!-- Existing certificates -->
-    <section class="section">
-        <div class="navds-stack navds-stack--gap-4 navds-stack--direction-row">
-            <h2 class="navds-heading navds-heading--medium">Existing certificates</h2>
-            <button
-                    class="navds-button navds-button--secondary"
-                    onclick="loadCerts()"
-            >
-                Refresh
-            </button>
-        </div>
-
-        <table class="navds-table">
-            <thead class="navds-table__header">
-            <tr class="navds-table__row">
-                <th class="navds-table__header-cell">CN</th>
-                <th class="navds-table__header-cell">Expires</th>
-                <th class="navds-table__header-cell">Days left</th>
-                <th class="navds-table__header-cell">Cert</th>
-                <th class="navds-table__header-cell">JKS</th>
-                <th class="navds-table__header-cell">Password</th>
-                <th class="navds-table__header-cell">Verify</th>
-                <th class="navds-table__header-cell">Client ID</th>
-                <th class="navds-table__header-cell">Username</th>
-                <th class="navds-table__header-cell"></th>
-            </tr>
-            </thead>
-            <tbody id="certTable" class="navds-table__body"></tbody>
-        </table>
-
-        <div style="margin-top: var(--a-spacing-6);">
-            <button
-                    class="navds-button navds-button--danger"
-                    onclick="flushLocal()"
-            >
-                Flush local certificate cache
-            </button>
-        </div>
-    </section>
-</div>
+<button onclick="flushLocal()" style="margin-top: 1em;">
+    🧹 Flush local certificate cache
+</button>
 
 <!-- Test Modal -->
 <div id="testModal" class="modal">
     <div class="modal-content">
-        <h3 class="navds-heading navds-heading--small">Test certificate</h3>
+        <h3>Test certificate</h3>
 
-        <div class="navds-form-field">
-            <label class="navds-label">CN</label>
-            <input id="testCn" class="navds-text-field__input" readonly />
+        <div>
+            CN:
+            <input id="testCn" readonly />
         </div>
 
-        <div class="navds-form-field">
-            <label class="navds-label">Salesforce Client ID</label>
-            <input id="testClientId" class="navds-text-field__input" />
+        <div>
+            Salesforce Client ID:
+            <input id="testClientId" />
         </div>
 
-        <div class="navds-form-field">
-            <label class="navds-label">Salesforce Username</label>
-            <input id="testUsername" class="navds-text-field__input" />
+        <div>
+            Salesforce Username:
+            <input id="testUsername" />
         </div>
 
         <div id="testResult"></div>
 
         <div class="modal-actions">
-            <button class="navds-button navds-button--primary" onclick="runTest()">Test</button>
-            <button class="navds-button navds-button--secondary" onclick="closeModal()">Close</button>
+            <button onclick="runTest()">Test</button>
+            <button onclick="closeModal()">Close</button>
         </div>
     </div>
 </div>
-
-<!-- Confirm Modal -->
 <div id="confirmModal" class="modal">
     <div class="modal-content">
-        <h3 id="confirmTitle" class="navds-heading navds-heading--small"></h3>
+        <h3 id="confirmTitle"></h3>
         <p id="confirmMessage"></p>
 
         <div class="modal-actions">
-            <button class="navds-button navds-button--secondary" onclick="closeConfirmModal()">Cancel</button>
-            <button class="navds-button navds-button--danger" id="confirmOkButton">
-                Confirm
-            </button>
+            <button type="button" onclick="closeConfirmModal()">Cancel</button>
+            <button type="button" id="confirmOkButton">Confirm</button>
         </div>
     </div>
 </div>
-
-<div id="toast"></div>
+<div id="toast" style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #333;
+    color: white;
+    padding: 0.6em 1em;
+    border-radius: 4px;
+    display: none;
+    z-index: 1000;
+">
 
 <script>
     let currentTestCn = null;
