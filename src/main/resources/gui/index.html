@@ -242,7 +242,7 @@
         }
 
         /* The checkmark */
-        .verify-icon::after {
+        .verify-icon.verified::after {
             content: "";
             position: absolute;
             left: 4px;
@@ -377,6 +377,8 @@
 
             const isTmp = c.source === "tmp";
 
+            const isVerified = !!(c.sfClientId && c.sfUsername);
+
             tr.innerHTML = `
   <td>${c.cn}</td>
   <td>${c.expiresAt}</td>
@@ -405,7 +407,7 @@
 
       <td>
         ${isTmp
-                ? `<button class="icon-btn verify-btn" title="Verify against Salesforce"
+                ? `<button class="icon-btn verify-btn ${isVerified ? `verified` : ``}" title="Verify against Salesforce"
                  onclick="openTestModal('${c.cn}')"><span class="verify-icon"></span></button>`
                 : ``}
       </td>
