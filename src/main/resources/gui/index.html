@@ -231,6 +231,32 @@
             z-index: 2000;
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
+
+        .verify-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        /* The checkmark */
+        .verify-icon::after {
+            content: "";
+            position: absolute;
+            left: 4px;
+            top: 0px;
+            width: 6px;
+            height: 12px;
+            border-right: 3px solid currentColor;
+            border-bottom: 3px solid currentColor;
+            transform: rotate(45deg);
+        }
+        .verify-btn { color: #777; }        /* unverified */
+        .verify-btn.verified { color: #1e7e34; } /* verified green */
+
+
     </style>
 
 </head>
@@ -379,8 +405,8 @@
 
       <td>
         ${isTmp
-                ? `<button class="icon-btn" title="Verify against Salesforce"
-                 onclick="openTestModal('${c.cn}')">🧪</button>`
+                ? `<button class="icon-btn verify-btn" title="Verify against Salesforce"
+                 onclick="openTestModal('${c.cn}')"><span class="verify-icon"></span></button>`
                 : ``}
       </td>
 
