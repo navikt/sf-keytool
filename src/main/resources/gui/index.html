@@ -243,18 +243,24 @@
 
         /* The checkmark */
         .verify-icon.verified::after {
+            background: red;
             content: "";
             position: absolute;
-            left: 4px;
-            top: 0px;
-            width: 6px;
-            height: 12px;
-            border-right: 3px solid currentColor;
-            border-bottom: 3px solid currentColor;
+            display: block;
+
+            left: 5px;
+            top: 2px;
+
+            width: 4px;
+            height: 8px;
+
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
             transform: rotate(45deg);
         }
-        .verify-btn { color: #777; }        /* unverified */
-        .verify-btn.verified { color: #1e7e34; } /* verified green */
+
+        .verify-btn { color: #777; }              /* unverified */
+        .verify-btn.verified { color: #1e7e34; }  /* verified green */
 
 
     </style>
