@@ -4,6 +4,81 @@
     <meta charset="UTF-8" />
     <title>Salesforce JWT Certificate Tool</title>
     <style>
+        :root {
+            --ax-text-neutral: #262626;
+            --ax-text-subtle: #6a6a6a;
+            --ax-text-danger-decoration: #c30000;
+
+            --ax-bg-hover: rgba(0, 0, 0, 0.06);
+            --ax-bg-active: rgba(0, 0, 0, 0.12);
+
+            --ax-focus-ring: #005bff;
+
+            --ax-radius-small: 4px;
+            --ax-spacing-2: 0.5rem;
+        }
+
+        .aksel-button {
+            appearance: none;
+            border: none;
+            background: none;
+            color: var(--ax-text-neutral);
+            border-radius: var(--ax-radius-small);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--ax-spacing-2);
+        }
+
+        .aksel-button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .aksel-button--tertiary {
+            background: transparent;
+        }
+
+        .aksel-button--icon-only {
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .aksel-button--tertiary:hover {
+            background: var(--ax-bg-hover);
+        }
+
+        .aksel-button--tertiary:active {
+            background: var(--ax-bg-active);
+        }
+
+        .aksel-button:focus-visible {
+            outline: 2px solid var(--ax-focus-ring);
+            outline-offset: 2px;
+        }
+
+        .aksel-button__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .aksel-button__icon svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: currentColor;
+        }
+
+        .aksel-button--tertiary-neutral {
+            color: var(--ax-text-danger-decoration);
+        }
+
+        .aksel-button--tertiary-neutral:hover {
+            background: rgba(195, 0, 0, 0.08);
+        }
+
+
         /* ---------- Base ---------- */
 
         body {
@@ -361,7 +436,7 @@
     border-radius: 4px;
     display: none;
     z-index: 1000;
-">
+"></div>
 
 <script>
     let currentTestCn = null;
@@ -396,18 +471,15 @@
                  onclick="download('${c.cn}', 'cer')">⬇️</button>`
                 : ``}
       </td>
-
       <td>
         ${isTmp
-                ? `<button class="icon-btn" title="Copy JKS Base64"
-                 onclick="copy('${c.cn}', 'jksb64')">📋</button>`
+                ? `<button title="Copy JKS Base64" onclick="copy('${c.cn}', 'jksb64')" type="button" data-active="false" data-variant="tertiary" class="aksel-copybutton aksel-button aksel-button&#45;&#45;tertiary aksel-button&#45;&#45;small aksel-button&#45;&#45;icon-only">&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;<span class="aksel-button__icon">&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" focusable="false" role="img" viewBox="0 0 24 24" aria-labelledby="c267" aria-hidden="false" class="aksel-copybutton__icon"><title id="c267">Copy</title>&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;<path fill="currentColor" fill-rule="evenodd" d="M8.25 3.5c0-.69.56-1.25 1.25-1.25H14a.75.75 0 0 1 .53.22l5 5c.141.14.22.331.22.53v8.5c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25zm6.25 5.25c-.69 0-1.25-.56-1.25-1.25V3.75h-3.5v12.5h8.5v-7.5zm.25-3.94 2.44 2.44h-2.44zM6.502 7.75H5.75v12.5h8.5v-.748a.75.75 0 0 1 1.5 0v.998c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25v-13c0-.69.56-1.25 1.25-1.25h1.002a.75.75 0 1 1 0 1.5" clip-rule="evenodd"></path></svg>&lt;!&ndash;&ndash;&gt;</span>&lt;!&ndash;&ndash;&gt; &lt;!&ndash;&ndash;&gt; &lt;!&ndash;&ndash;&gt;</button>`
                 : ``}
       </td>
 
       <td>
         ${isTmp
-                ? `<button class="icon-btn" title="Copy keystore password"
-                 onclick="copy('${c.cn}', 'password')">📋</button>`
+                ? `<button title="Copy JKS keystore password" onclick="copy('${c.cn}', 'password')" type="button" data-active="false" data-variant="tertiary" class="aksel-copybutton aksel-button aksel-button&#45;&#45;tertiary aksel-button&#45;&#45;small aksel-button&#45;&#45;icon-only">&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;<span class="aksel-button__icon">&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" focusable="false" role="img" viewBox="0 0 24 24" aria-labelledby="c267" aria-hidden="false" class="aksel-copybutton__icon"><title id="c267">Copy</title>&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;<path fill="currentColor" fill-rule="evenodd" d="M8.25 3.5c0-.69.56-1.25 1.25-1.25H14a.75.75 0 0 1 .53.22l5 5c.141.14.22.331.22.53v8.5c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25zm6.25 5.25c-.69 0-1.25-.56-1.25-1.25V3.75h-3.5v12.5h8.5v-7.5zm.25-3.94 2.44 2.44h-2.44zM6.502 7.75H5.75v12.5h8.5v-.748a.75.75 0 0 1 1.5 0v.998c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25v-13c0-.69.56-1.25 1.25-1.25h1.002a.75.75 0 1 1 0 1.5" clip-rule="evenodd"></path></svg>&lt;!&ndash;&ndash;&gt;</span>&lt;!&ndash;&ndash;&gt; &lt;!&ndash;&ndash;&gt; &lt;!&ndash;&ndash;&gt;</button>`
                 : ``}
       </td>
 
@@ -421,9 +493,7 @@
       <td>
   ${
                 isTmp && c.sfClientId
-                    ? `<button class="icon-btn"
-           title="Copy SF Client ID"
-           onclick="copyValue('${c.sfClientId}')">📋</button>`
+                    ? `<button title="Copy SF Client ID" onclick="copyValue('${c.sfClientId}')" type="button" data-active="false" data-variant="tertiary" class="aksel-copybutton aksel-button aksel-button&#45;&#45;tertiary aksel-button&#45;&#45;small aksel-button&#45;&#45;icon-only">&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;<span class="aksel-button__icon">&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" focusable="false" role="img" viewBox="0 0 24 24" aria-labelledby="c267" aria-hidden="false" class="aksel-copybutton__icon"><title id="c267">Copy</title>&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;<path fill="currentColor" fill-rule="evenodd" d="M8.25 3.5c0-.69.56-1.25 1.25-1.25H14a.75.75 0 0 1 .53.22l5 5c.141.14.22.331.22.53v8.5c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25zm6.25 5.25c-.69 0-1.25-.56-1.25-1.25V3.75h-3.5v12.5h8.5v-7.5zm.25-3.94 2.44 2.44h-2.44zM6.502 7.75H5.75v12.5h8.5v-.748a.75.75 0 0 1 1.5 0v.998c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25v-13c0-.69.56-1.25 1.25-1.25h1.002a.75.75 0 1 1 0 1.5" clip-rule="evenodd"></path></svg>&lt;!&ndash;&ndash;&gt;</span>&lt;!&ndash;&ndash;&gt; &lt;!&ndash;&ndash;&gt; &lt;!&ndash;&ndash;&gt;</button>`
                     : (!isTmp && c.sfClientId
                         ? `<span title="Masked Client ID">${c.sfClientId}</span>`
                         : ``)
@@ -433,9 +503,7 @@
       <td>
   ${
                 isTmp && c.sfUsername
-                    ? `<button class="icon-btn"
-           title="Copy SF Username"
-           onclick="copyValue('${c.sfUsername}')">📋</button>`
+                    ? `<button title="Copy SF Username" onclick="copyValue('${c.sfUsername}')" type="button" data-active="false" data-variant="tertiary" class="aksel-copybutton aksel-button aksel-button&#45;&#45;tertiary aksel-button&#45;&#45;small aksel-button&#45;&#45;icon-only">&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;<span class="aksel-button__icon">&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" focusable="false" role="img" viewBox="0 0 24 24" aria-labelledby="c267" aria-hidden="false" class="aksel-copybutton__icon"><title id="c267">Copy</title>&lt;!&ndash;&ndash;&gt;&lt;!&ndash;&ndash;&gt;<path fill="currentColor" fill-rule="evenodd" d="M8.25 3.5c0-.69.56-1.25 1.25-1.25H14a.75.75 0 0 1 .53.22l5 5c.141.14.22.331.22.53v8.5c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25zm6.25 5.25c-.69 0-1.25-.56-1.25-1.25V3.75h-3.5v12.5h8.5v-7.5zm.25-3.94 2.44 2.44h-2.44zM6.502 7.75H5.75v12.5h8.5v-.748a.75.75 0 0 1 1.5 0v.998c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25v-13c0-.69.56-1.25 1.25-1.25h1.002a.75.75 0 1 1 0 1.5" clip-rule="evenodd"></path></svg>&lt;!&ndash;&ndash;&gt;</span>&lt;!&ndash;&ndash;&gt; &lt;!&ndash;&ndash;&gt; &lt;!&ndash;&ndash;&gt;</button>`
                     : (!isTmp && c.sfUsername
                         ? `<span title="Integration user">${c.sfUsername}</span>`
                         : ``)
@@ -624,6 +692,5 @@
 
     loadCerts();
 </script>
-
 </body>
 </html>
