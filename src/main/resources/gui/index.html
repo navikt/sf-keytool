@@ -84,9 +84,6 @@
             background: var(--ax-bg-danger-active);
         }
 
-
-
-
         .aksel-button:focus-visible {
             outline: 2px solid var(--ax-focus-ring);
             outline-offset: 2px;
@@ -123,9 +120,6 @@
         .aksel-label--small {
             font-size: 0.875rem; /* ~14px */
         }
-
-
-
 
 
         /* ---------- Base ---------- */
@@ -231,10 +225,6 @@
             width: 150px;
         }
 
-        .copysecret {
-            font-size:0.85rem;
-        }
-
         .center {
             text-align: center;
         }
@@ -251,6 +241,26 @@
 
         tbody tr:hover {
             background-color: #eef5ff;
+        }
+
+        tr.verified {
+            background-color: #f1f8f4;
+        }
+
+        tbody tr.verified:nth-child(odd) {
+            background-color: #f7fff8;
+        }
+
+        tr.verified td:first-child {
+            border-left: 4px solid #28a745;
+        }
+
+        tr.new td:first-child {
+            border-left: 4px solid #b3dcff;
+        }
+
+        tr.verified:hover {
+            box-shadow: inset 0 0 0 9999px rgba(40,167,69,0.06);
         }
 
         .warn {
@@ -323,7 +333,7 @@
 
         .modal-content {
             background: #ffffff;
-            max-width: 420px;
+            max-width: 520px;
             margin: 10% auto;
             padding: 1.2em;
             border-radius: 8px;
@@ -340,6 +350,34 @@
             display: flex;
             justify-content: space-between;
         }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.75em;
+        }
+
+        .form-row label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-row input {
+            padding: 0.45em 0.6em;
+            font-size: 0.95em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-row input[readonly] {
+            background-color: #f3f3f3;
+            color: #666;
+            border-style: dashed;
+            cursor: not-allowed;
+        }
+
 
         /* ---------- Results ---------- */
 
@@ -402,9 +440,6 @@
             transform: rotate(45deg);
         }
 
-        .verify-btn { color: #777; }              /* unverified */
-        .verify-btn.verified { color: #1e7e34; }  /* verified green */
-
 
     </style>
 
@@ -417,7 +452,7 @@
     <div>
         Name:
         <br/>
-        <input name="cn" required placeholder="common name" />
+        <input name="cn" required/>
     </div>
     <div>
         Validity days:
@@ -461,19 +496,19 @@
     <div class="modal-content">
         <h3>Test certificate</h3>
 
-        <div>
-            Name:
-            <input id="testCn" readonly />
+        <div class="form-row">
+            <label>Name:</label>
+            <input id="testCn" readonly>
         </div>
 
-        <div>
-            Salesforce Client ID:
-            <input id="testClientId" />
+        <div class="form-row">
+            <label>Salesforce Client ID:</label>
+            <input id="testClientId">
         </div>
 
-        <div>
-            Salesforce Username:
-            <input id="testUsername" />
+        <div class="form-row">
+            <label>Salesforce Username:</label>
+            <input id="testUsername">
         </div>
 
         <div id="testResult"></div>
@@ -517,7 +552,16 @@
 
             const isTmp = c.source === "tmp";
 
-            const isVerified = !!(c.sfClientId && c.sfUsername);
+            const isVerified = (isTmp && c.sfClientId);
+            const isNew = (isTmp && !c.sfClientId);
+
+            if (isVerified) {
+                tr.classList.add("verified");
+            }
+
+            if (isNew) {
+                tr.classList.add("new");
+            }
 
             tr.innerHTML = `
   <td>${c.cn}</td>
