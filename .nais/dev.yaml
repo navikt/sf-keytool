@@ -47,6 +47,11 @@ spec:
           - NAVident
 #    sidecar:
 #      enabled: false
+  accessPolicy:
+    outbound:
+      external:
+        - host: test.salesforce.com
+        - host: hooks.slack.com
 #  accessPolicy:
 #    inbound:
 #      rules:
