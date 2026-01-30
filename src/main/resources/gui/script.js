@@ -164,17 +164,6 @@ function showDuplicateWarnings(list) {
         });
     });
 
-    if (expiryWarnings.length === 0) {
-        expiryBox.innerHTML = "";
-    } else {
-        expiryBox.innerHTML = `
-        <div class="warning-block">
-            <strong>⏰ Certificates nearing expiration</strong>
-            ${expiryWarnings.map(w => `<div class="warning-row">${w}</div>`).join("")}
-        </div>
-    `;
-    }
-
     if (warnings.length > 0) {
         warningsDiv.innerHtml = `
         <div class="warning-block">
