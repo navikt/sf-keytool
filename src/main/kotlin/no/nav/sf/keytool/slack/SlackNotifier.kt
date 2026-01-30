@@ -1,6 +1,7 @@
 package no.nav.sf.keytool.slack
 
 import com.google.gson.Gson
+import no.nav.sf.keytool.cert.registryUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -47,21 +48,9 @@ object SlackNotifier {
     ): List<Map<String, Any>> {
         val blocks = mutableListOf<Map<String, Any>>()
 
-        // Header
-        blocks +=
-            mapOf(
-                "type" to "header",
-                "text" to
-                    mapOf(
-                        "type" to "plain_text",
-                        "text" to title,
-                    ),
-            )
+        blocks += header(title)
+        blocks += divider()
 
-        // Divider
-        blocks += mapOf("type" to "divider")
-
-        // Body
         if (lines.isEmpty()) {
             blocks += section("✅ No certificates expiring soon")
         } else {
@@ -70,16 +59,28 @@ object SlackNotifier {
             }
         }
 
+        blocks += divider()
+
+        val url = registryUrl()
+        blocks +=
+            section(
+                "Please review the certificate registry *<$url|here>*",
+            )
+
         return blocks
     }
 
-    private fun section(text: String): Map<String, Any> =
+    private fun header(text: String) =
+        mapOf(
+            "type" to "header",
+            "text" to mapOf("type" to "plain_text", "text" to text),
+        )
+
+    private fun divider() = mapOf("type" to "divider")
+
+    private fun section(text: String) =
         mapOf(
             "type" to "section",
-            "text" to
-                mapOf(
-                    "type" to "mrkdwn",
-                    "text" to text,
-                ),
+            "text" to mapOf("type" to "mrkdwn", "text" to text),
         )
 }

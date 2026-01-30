@@ -2,6 +2,7 @@
 
 package no.nav.sf.keytool.cert
 
+import no.nav.sf.keytool.config_CONTEXT
 import no.nav.sf.keytool.config_SF_TOKENHOST
 import no.nav.sf.keytool.db.PostgresDatabase
 import no.nav.sf.keytool.env
@@ -410,3 +411,10 @@ val expiryCheckHandler: HttpHandler = {
             .body(body)
     }
 }
+
+fun registryUrl(): String =
+    if (env(config_CONTEXT).equals("DEV", ignoreCase = true)) {
+        "https://sf-keytool.intern.dev.nav.no"
+    } else {
+        "https://sf-keytool.intern.nav.no"
+    }
