@@ -401,7 +401,7 @@ val expiryCheckHandler: HttpHandler = {
         if (expiringLines.isNotEmpty()) {
             SlackNotifier.postMessage(
                 webhookUrl = webhookUrl,
-                title = "⚠ Salesforce certificates expiring",
+                title = "⚠ Salesforce middleware certificates expiring",
                 lines = expiringLines,
             )
         }
