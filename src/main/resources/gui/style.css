@@ -301,16 +301,16 @@ tr.expires-soon .days-left {
 }
 
 .warning-block {
-    background: #fff3cd;
-    border: 1px solid #ffeeba;
-    padding: 10px 12px;
+    margin-top: 1em;
+    padding: 0.75em 1em;
+    border: 1px solid rgb(224, 180, 180);
+    background: rgb(255, 244, 244);
     border-radius: 6px;
 }
 
 .warning-block strong {
     display: block;
-    margin-bottom: 6px;
-    color: #856404;
+    color: rgb(122, 31, 31);
 }
 
 

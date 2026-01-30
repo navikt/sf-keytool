@@ -19,7 +19,7 @@ async function loadCerts() {
 
         if (c.daysLeft < 90) {
             const status =
-                c.daysLeft < 0
+                c.daysLeft < 1
                     ? "has expired"
                     : `expires in ${c.daysLeft} days`;
 
@@ -128,10 +128,6 @@ function last10(str) {
 function showDuplicateWarnings(list) {
     const deprecated = new Set();
     const warningsDiv = document.getElementById("certWarnings");
-    const warningsList = document.getElementById("certWarningsList");
-
-    warningsList.innerHTML = "";
-    warningsDiv.style.display = "none";
 
     // Group certs by last-10 of SF_CLIENT_ID
     const groups = new Map();
@@ -162,20 +158,30 @@ function showDuplicateWarnings(list) {
         certs.slice(1).forEach(c => {
             deprecated.add(c.cn);
             warnings.push(
-                `Certificate ${c.cn} is deprecated. A newer certificate is associated with client id ***${last10(c.sfClientId)}`
+                `Certificate <strong>${c.cn}</strong> is deprecated. A newer certificate is associated with client id ***${last10(c.sfClientId)}`
             );
 
         });
     });
 
-    if (warnings.length > 0) {
-        warnings.forEach(msg => {
-            const li = document.createElement("li");
-            li.textContent = msg;
-            warningsList.appendChild(li);
-        });
+    if (expiryWarnings.length === 0) {
+        expiryBox.innerHTML = "";
+    } else {
+        expiryBox.innerHTML = `
+        <div class="warning-block">
+            <strong>⏰ Certificates nearing expiration</strong>
+            ${expiryWarnings.map(w => `<div class="warning-row">${w}</div>`).join("")}
+        </div>
+    `;
+    }
 
-        warningsDiv.style.display = "block";
+    if (warnings.length > 0) {
+        warningsDiv.innerHtml = `
+        <div class="warning-block">
+            <strong>⚠ Duplicate Salesforce configuration</strong>
+            ${warnings.map(w => `<div class="warning-row">${w}</div>`).join("")}
+        </div>
+    `;
     }
 
     return deprecated;
