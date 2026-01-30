@@ -411,10 +411,3 @@ val expiryCheckHandler: HttpHandler = {
             .body(body)
     }
 }
-
-fun registryUrl(): String =
-    if (env(config_CONTEXT).equals("DEV", ignoreCase = true)) {
-        "https://sf-keytool.intern.dev.nav.no"
-    } else {
-        "https://sf-keytool.intern.nav.no"
-    }

@@ -1,7 +1,8 @@
 package no.nav.sf.keytool.slack
 
 import com.google.gson.Gson
-import no.nav.sf.keytool.cert.registryUrl
+import no.nav.sf.keytool.config_CONTEXT
+import no.nav.sf.keytool.env
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -64,7 +65,8 @@ object SlackNotifier {
         val url = registryUrl()
         blocks +=
             section(
-                "Please review the certificate registry *<$url|here>*",
+                "Please review the certificate registry *<$url|here>* (" +
+                    (if (env(config_CONTEXT).equals("DEV", ignoreCase = true)) "dev" else "prod") + ")",
             )
 
         return blocks
@@ -83,4 +85,11 @@ object SlackNotifier {
             "type" to "section",
             "text" to mapOf("type" to "mrkdwn", "text" to text),
         )
+
+    fun registryUrl(): String =
+        if (env(config_CONTEXT).equals("DEV", ignoreCase = true)) {
+            "https://sf-keytool.intern.dev.nav.no/internal/gui"
+        } else {
+            "https://sf-keytool.intern.nav.no/internal/gui"
+        }
 }
