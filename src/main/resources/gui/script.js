@@ -157,7 +157,7 @@ function showDuplicateWarnings(list) {
         certs.slice(1).forEach(c => {
             deprecated.add(c.cn);
             warnings.push(
-                `Certificate <strong>${c.cn}</strong> is deprecated. A newer certificate is associated with client id ***${last10(c.sfClientId)}`
+                `Certificate <strong>${c.cn}</strong> has been replaced. Associated client id: ***${last10(c.sfClientId)}`
             );
 
         });

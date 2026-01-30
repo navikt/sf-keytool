@@ -284,10 +284,10 @@ tbody tr:nth-child(odd).deprecated:hover {
 }
 
 tr.expires-soon {
-    background-color: #fff3cd;   /* light amber */
+    background-color: #ffd8b0
 }
 tbody tr:nth-child(odd).expires-soon {
-    background-color: #fff3cd;
+    background-color: #ffe8b0
 }
 
 tr.expires-soon td {
@@ -297,6 +297,10 @@ tr.expires-soon td {
 tr.expires-soon .days-left {
     color: #856404;
     font-weight: bold;
+}
+
+tr.expires-soon td:first-child {
+    border-left: 4px solid #ee9191;
 }
 
 

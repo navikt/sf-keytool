@@ -6,6 +6,7 @@ import no.nav.sf.keytool.cert.baseDir
 import no.nav.sf.keytool.cert.certHandler
 import no.nav.sf.keytool.cert.deleteCertHandler
 import no.nav.sf.keytool.cert.downloadHandler
+import no.nav.sf.keytool.cert.expiryCheckHandler
 import no.nav.sf.keytool.cert.flushLocalHandler
 import no.nav.sf.keytool.cert.listAllCerts
 import no.nav.sf.keytool.cert.testCertHandler
@@ -90,6 +91,7 @@ class Application {
                 val file = req.path("file")!!
                 downloadHandler(cn, file)
             },
+            "/internal/cert/expiryCheck" bind Method.GET to expiryCheckHandler,
             "/internal/cert/test" bind Method.POST to testCertHandler,
             "/internal/cert/delete" bind Method.POST to deleteCertHandler,
             "/internal/cert/flush" bind Method.POST to flushLocalHandler,

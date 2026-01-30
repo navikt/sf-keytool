@@ -29,6 +29,7 @@ import java.security.SecureRandom
 import java.security.Security
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
+import java.time.Duration
 import java.time.Instant
 import java.util.Base64
 import java.util.Date
@@ -340,3 +341,48 @@ private fun generatePassword(bytes: Int = 24): String =
         .encodeToString(
             ByteArray(bytes).also { SecureRandom().nextBytes(it) },
         )
+
+val expiryCheckHandler: HttpHandler = {
+    val now = Instant.now()
+
+    // Fetch from DB (validated certs only)
+    val certs = listAllCerts()
+
+    val expiring =
+        certs
+            .map { cert ->
+                val daysLeft =
+                    Duration.between(now, cert.expiresAt).toDays()
+                cert to daysLeft
+            }.filter { (_, daysLeft) ->
+                daysLeft <= 90
+            }.sortedBy { it.second } // soonest first
+
+    if (expiring.isEmpty()) {
+        Response(Status.OK)
+            .body("OK – no certificates expiring within 90 days")
+    } else {
+        val body =
+            buildString {
+                appendLine("❗ Certificates expired or expiring soon (<= 90 days)")
+                appendLine()
+
+                expiring.forEach { (cert, daysLeft) ->
+                    when {
+                        daysLeft < 0 ->
+                            appendLine("- ${cert.cn} (expired ${-daysLeft} days ago)")
+                        daysLeft == 0L ->
+                            appendLine("- ${cert.cn} (expires today)")
+                        else ->
+                            appendLine("- ${cert.cn} ($daysLeft days left)")
+                    }
+                }
+            }
+
+        // TODO Post to Slack ...
+
+        Response(Status.OK)
+            .header("Content-Type", "text/plain")
+            .body(body)
+    }
+}
