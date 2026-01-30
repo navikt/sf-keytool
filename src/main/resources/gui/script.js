@@ -7,12 +7,26 @@ async function loadCerts() {
 
     const deprecatedCns = showDuplicateWarnings(list);
 
+
     const tbody = document.getElementById("certTable");
     tbody.innerHTML = "";
+
+    const expiryWarnings = [];
 
     existingCns.clear()
     list.forEach(c => {
         existingCns.add(c.cn);
+
+        if (c.daysLeft < 90) {
+            const status =
+                c.daysLeft < 0
+                    ? "has expired"
+                    : `expires in ${c.daysLeft} days`;
+
+            expiryWarnings.push(
+                `Certificate <strong>${c.cn}</strong> ${status}`
+            );
+        }
 
         const tr = document.createElement("tr");
         const warn = c.daysLeft < 60 ? "warn" : "";
@@ -21,6 +35,12 @@ async function loadCerts() {
 
         const isVerified = (isTmp && c.sfClientId);
         const isNew = (isTmp && !c.sfClientId);
+
+        const warnExpiry = c.daysLeft < 90;
+
+        if (warnExpiry) {
+            tr.classList.add("expires-soon");
+        }
 
         if (deprecatedCns && deprecatedCns.has(c.cn)) {
             tr.classList.add("deprecated");
@@ -37,7 +57,7 @@ async function loadCerts() {
         tr.innerHTML = `
   <td>${c.cn}</td>
   <td>${c.expiresAt}</td>
-  <td class="${warn}">${c.daysLeft}</td>
+  <td class="${warnExpiry ? 'warn' : ''}">${c.daysLeft}</td>
 
       <td class="center">
         ${isTmp
@@ -86,6 +106,18 @@ async function loadCerts() {
 `;
         tbody.appendChild(tr);
     });
+    const expiryBox = document.getElementById("expiryWarnings");
+
+    if (expiryWarnings.length === 0) {
+        expiryBox.innerHTML = "";
+    } else {
+        expiryBox.innerHTML = `
+        <div class="warning-block">
+            <strong>⏰ Certificates nearing expiration</strong>
+            ${expiryWarnings.map(w => `<div class="warning-row">${w}</div>`).join("")}
+        </div>
+    `;
+    }
 }
 
 function last10(str) {

@@ -274,12 +274,45 @@ tr.deprecated td {
 tr.deprecated:hover {
     background-color: #ffefc1;
 }
+tbody tr:nth-child(odd).deprecated:hover {
+    background-color: #fff7d8;
+}
+
+tr.expires-soon {
+    background-color: #fff3cd;   /* light amber */
+}
+tbody tr:nth-child(odd).expires-soon {
+    background-color: #fff3cd;
+}
+
+tr.expires-soon td {
+    border-color: #ffeeba;
+}
+
+tr.expires-soon .days-left {
+    color: #856404;
+    font-weight: bold;
+}
 
 
 .warn {
     color: #b00020;
     font-weight: bold;
 }
+
+.warning-block {
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 10px 12px;
+    border-radius: 6px;
+}
+
+.warning-block strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #856404;
+}
+
 
 /* ---------- Icon Buttons ---------- */
 
