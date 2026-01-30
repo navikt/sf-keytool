@@ -54,6 +54,7 @@ spec:
 #          namespace: teamcrm
 #          cluster: dev-external
   envFrom:
+    - secret: sf-pubsub-preprod
     - secret: sf-keytool
   env:
     - name: CONTEXT
