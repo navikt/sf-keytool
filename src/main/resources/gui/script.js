@@ -166,7 +166,7 @@ function showDuplicateWarnings(list) {
     const warningsDiv = document.getElementById("certWarnings");
 
     if (warnings.length > 0) {
-        warningsDiv.innerHtml = `
+        warningsDiv.innerHTML = `
         <div class="warning-block">
             <strong>⚠ Duplicate Salesforce configuration</strong>
             ${warnings.map(w => `<div class="warning-row">${w}</div>`).join("")}
