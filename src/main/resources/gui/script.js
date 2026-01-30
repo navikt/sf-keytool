@@ -127,7 +127,6 @@ function last10(str) {
 
 function showDuplicateWarnings(list) {
     const deprecated = new Set();
-    const warningsDiv = document.getElementById("certWarnings");
 
     // Group certs by last-10 of SF_CLIENT_ID
     const groups = new Map();
@@ -163,6 +162,8 @@ function showDuplicateWarnings(list) {
 
         });
     });
+
+    const warningsDiv = document.getElementById("certWarnings");
 
     if (warnings.length > 0) {
         warningsDiv.innerHtml = `
@@ -348,4 +349,17 @@ document.getElementById("generateForm").onsubmit = async e => {
     }
 };
 
+async function loadContext() {
+    try {
+        const res = await fetch("/internal/context");
+        if (!res.ok) return;
+
+        const env = (await res.text()).trim().toUpperCase();
+        document.getElementById("envTag").textContent = ` (${env})`;
+    } catch (e) {
+        console.warn("Could not load context", e);
+    }
+}
+
+loadContext();
 loadCerts();

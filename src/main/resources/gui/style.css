@@ -126,6 +126,11 @@ h2 {
     color: #0e2a3d;
 }
 
+#envTag {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
 /* ---------- Forms & Inputs ---------- */
 
 input {
@@ -309,7 +314,7 @@ tr.expires-soon .days-left {
 }
 
 .warning-block strong {
-    display: block;
+    display: inline-block;
     color: rgb(122, 31, 31);
 }
 

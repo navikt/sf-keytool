@@ -62,6 +62,7 @@ class Application {
             "/internal/hello" bind Method.GET to { Response(OK).body("Hello") },
             "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
             "/internal/gui" bind Method.GET to static(ResourceLoader.Classpath("gui")),
+            "/internal/context" bind Method.GET to { Response(OK).body(env(config_CONTEXT)) },
             "/internal/access" bind Method.GET to { Response(OK).body("Got access token for instance: ${accessTokenHandler.instanceUrl}") },
             // Generate + store cert under /tmp/sf-certs/{cn}
             "/internal/cert/generate" bind Method.POST to certHandler,
