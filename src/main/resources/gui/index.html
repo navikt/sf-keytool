@@ -268,6 +268,14 @@
             background-color: #fff8e1; /* soft amber */
         }
 
+        tbody tr:nth-child(odd).deprecated {
+            background-color: #f4eed7ff; /* soft amber */
+        }
+
+        tr.verified td:first-child {
+            border-left: 4px solid #a78328;
+        }
+
         tr.deprecated td {
             color: #6b4f00;
         }
@@ -509,7 +517,7 @@
     border-radius: 6px;
     display: none;
 ">
-    <strong>⚠ Potential duplicate Salesforce configuration</strong>
+    <strong>⚠ Duplicate Salesforce configuration</strong>
     <ul id="certWarningsList" style="margin: 0.5em 0 0 1.2em;"></ul>
 </div>
 
@@ -691,7 +699,7 @@
             certs.slice(1).forEach(c => {
                 deprecated.add(c.cn);
                 warnings.push(
-                    `Certificate '${c.cn}' is deprecated. A newer certificate is associated with client id ***'${last10(c.sfClientId)}'`
+                    `Certificate <strong>${c.cn}</strong> is deprecated. A newer certificate is associated with client id ***${last10(c.sfClientId)}`
                 );
 
             });
