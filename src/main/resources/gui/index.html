@@ -263,6 +263,20 @@
             box-shadow: inset 0 0 0 9999px rgba(40,167,69,0.06);
         }
 
+        /* Deprecated / superseded certificate row */
+        tr.deprecated {
+            background-color: #fff8e1; /* soft amber */
+        }
+
+        tr.deprecated td {
+            color: #6b4f00;
+        }
+
+        tr.deprecated:hover {
+            background-color: #ffefc1;
+        }
+
+
         .warn {
             color: #b00020;
             font-weight: bold;
@@ -552,7 +566,7 @@
         const res = await fetch("/internal/cert/list");
         const list = await res.json();
 
-        showDuplicateWarnings(list);
+        const deprecatedCns = showDuplicateWarnings(list);
 
         const tbody = document.getElementById("certTable");
         tbody.innerHTML = "";
@@ -568,6 +582,10 @@
 
             const isVerified = (isTmp && c.sfClientId);
             const isNew = (isTmp && !c.sfClientId);
+
+            if (deprecatedCns && deprecatedCns.has(c.cn)) {
+                tr.classList.add("deprecated");
+            }
 
             if (isVerified) {
                 tr.classList.add("verified");
@@ -637,6 +655,7 @@
     }
 
     function showDuplicateWarnings(list) {
+        const deprecated = new Set();
         const warningsDiv = document.getElementById("certWarnings");
         const warningsList = document.getElementById("certWarningsList");
 
@@ -670,9 +689,11 @@
 
             // All except newest are deprecated
             certs.slice(1).forEach(c => {
+                deprecated.add(c.cn);
                 warnings.push(
-                    `Certificate '${c.cn}' already configured – deprecated?`
+                    `Certificate '${c.cn}' is deprecated. A newer certificate is associated with client id ***'${last10(c.sfClientId)}'`
                 );
+
             });
         });
 
@@ -685,6 +706,8 @@
 
             warningsDiv.style.display = "block";
         }
+
+        return deprecated;
     }
 
 
