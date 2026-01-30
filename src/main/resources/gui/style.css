@@ -280,14 +280,14 @@ tr.deprecated:hover {
     background-color: #ffefc1;
 }
 tbody tr:nth-child(odd).deprecated:hover {
-    background-color: #fff7d8;
+    background-color: #ffefc1;
 }
 
 tr.expires-soon {
     background-color: #ffd8b0
 }
 tbody tr:nth-child(odd).expires-soon {
-    background-color: #ffe8b0
+    background-color: #ffceb0
 }
 
 tr.expires-soon td {
@@ -301,6 +301,13 @@ tr.expires-soon .days-left {
 
 tr.expires-soon td:first-child {
     border-left: 4px solid #ee9191;
+}
+
+tr.expires-soon:hover {
+    background-color: #ffccc1;
+}
+tbody tr:nth-child(odd).expires-soon:hover {
+    background-color: #ffd8d8;
 }
 
 

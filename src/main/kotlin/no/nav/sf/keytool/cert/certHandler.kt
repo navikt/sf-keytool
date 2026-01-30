@@ -5,6 +5,8 @@ package no.nav.sf.keytool.cert
 import no.nav.sf.keytool.config_SF_TOKENHOST
 import no.nav.sf.keytool.db.PostgresDatabase
 import no.nav.sf.keytool.env
+import no.nav.sf.keytool.secret_WEBHOOK_URL
+import no.nav.sf.keytool.slack.SlackNotifier
 import no.nav.sf.keytool.token.DefaultAccessTokenHandler
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.cert.X509CertificateHolder
@@ -364,7 +366,7 @@ val expiryCheckHandler: HttpHandler = {
     } else {
         val body =
             buildString {
-                appendLine("❗ Certificates expired or expiring soon (<= 90 days)")
+                appendLine("Certificates expired or expiring soon (<= 90 days)")
                 appendLine()
 
                 expiring.forEach { (cert, daysLeft) ->
@@ -379,7 +381,29 @@ val expiryCheckHandler: HttpHandler = {
                 }
             }
 
-        // TODO Post to Slack ...
+        // Separate format (standalone logic) for Slack:
+
+        val webhookUrl = env(secret_WEBHOOK_URL)
+
+        val expiringLines =
+            expiring.map { (cert, daysLeft) ->
+                when {
+                    daysLeft < 0 ->
+                        "*${cert.cn}* – expired ${-daysLeft} days ago"
+                    daysLeft == 0L ->
+                        "*${cert.cn}* – expires today"
+                    else ->
+                        "*${cert.cn}* – $daysLeft days left"
+                }
+            }
+
+        if (expiringLines.isNotEmpty()) {
+            SlackNotifier.postMessage(
+                webhookUrl = webhookUrl,
+                title = "⚠ Salesforce certificates expiring",
+                lines = expiringLines,
+            )
+        }
 
         Response(Status.OK)
             .header("Content-Type", "text/plain")

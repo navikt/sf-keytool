@@ -20,6 +20,8 @@ const val secret_KEYSTORE_PASSWORD = "KEYSTORE_PASSWORD"
 const val secret_PRIVATE_KEY_ALIAS = "PRIVATE_KEY_ALIAS"
 const val secret_PRIVATE_KEY_PASSWORD = "PRIVATE_KEY_PASSWORD"
 
+const val secret_WEBHOOK_URL = "WEBHOOK_URL"
+
 /**
  * Shortcut for fetching environment variables
  */
