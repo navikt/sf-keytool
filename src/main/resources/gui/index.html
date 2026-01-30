@@ -265,15 +265,14 @@
 
         /* Deprecated / superseded certificate row */
         tr.deprecated {
-            background-color: #fff8e1; /* soft amber */
-        }
+            background-color: #fff8e1;
 
         tbody tr:nth-child(odd).deprecated {
-            background-color: #f4eed7ff; /* soft amber */
+            background-color: #fff7d8;
         }
 
-        tr.verified td:first-child {
-            border-left: 4px solid #a78328;
+        tr.deprecated td:first-child {
+            border-left: 4px solid #eed491;
         }
 
         tr.deprecated td {
@@ -699,7 +698,7 @@
             certs.slice(1).forEach(c => {
                 deprecated.add(c.cn);
                 warnings.push(
-                    `Certificate <strong>${c.cn}</strong> is deprecated. A newer certificate is associated with client id ***${last10(c.sfClientId)}`
+                    `Certificate ${c.cn} is deprecated. A newer certificate is associated with client id ***${last10(c.sfClientId)}`
                 );
 
             });
