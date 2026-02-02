@@ -361,5 +361,26 @@ async function loadContext() {
     }
 }
 
-loadContext();
-loadCerts();
+window.onload = function() {
+    loadContext();
+    checkAuthorization();
+};
+
+const checkAuthorization = async () => {
+    const response = await fetch('/internal/secrethello', {
+        method: 'GET'
+    });
+
+    if (response.status === 401) {
+        // Unauthorized
+        document.getElementById('authorization-message').innerHTML =
+            'Unauthorized <button class="login-button" onclick="login()">Login</button>';
+        return;
+    }
+
+    loadCerts();
+};
+
+const login = () => {
+    window.location.href = '/oauth2/login?redirect=/internal/gui';
+};

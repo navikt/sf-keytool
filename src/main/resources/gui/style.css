@@ -502,3 +502,51 @@ td > .icon-btn:only-child {
     transform: rotate(45deg);
 }
 
+.login-button {
+    color: white;
+    border: none;
+    background-color: #008CBA;
+    border-radius: 10%;
+    display: inline-block;
+    padding: 2px 4px;
+    cursor: pointer;
+}
+
+#info-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding: 2px;
+    background-color: #e0e0e0;
+}
+
+#authorization-message {
+    color: red;
+    font-weight: bold;
+}
+
+#name-info, #expire-info {
+    margin: 0;
+}
+
+#name-info {
+    font-size: 13px;
+    color: #183f5e;
+}
+
+#expire-info {
+    font-size: 13px;
+    color: #185d5e;
+}
+
+#logout-button {
+    color: white;
+    border: none;
+    background-color: #008CBA;
+    border-radius: 10%;
+    display: inline-block;
+    padding: 2px 4px;
+    cursor: pointer;
+}
+

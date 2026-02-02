@@ -45,8 +45,8 @@ spec:
         extra:
           - azp_name
           - NAVident
-#    sidecar:
-#      enabled: false
+    sidecar:
+      enabled: false
   accessPolicy:
     outbound:
       external:
