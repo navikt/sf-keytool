@@ -369,11 +369,6 @@ async function loadContext() {
     }
 }
 
-window.onload = function() {
-    loadContext();
-    checkAuthorization();
-};
-
 const checkAuthorization = async () => {
     const response = await fetch('/internal/secrethello', {
         method: 'GET'
@@ -403,4 +398,49 @@ const login = () => {
 
 const logout = () => {
     window.location.href = '/oauth2/logout?redirect=/internal/gui';
+};
+
+async function updateLoginStatus() {
+    const label = document.getElementById("userLabel");
+    const btn = document.getElementById("loginLogoutBtn");
+
+    try {
+        const response = await fetch('/internal/secrethello', {
+            method: 'GET'
+        });
+
+        // ---------- UNAUTHORIZED ----------
+        if (response.status === 401) {
+            label.textContent = "Unauthorized";
+            label.classList.remove("authorized");
+            label.classList.add("unauthorized");
+
+            btn.textContent = "Login";
+            btn.onclick = login;
+            return;
+        }
+
+        // ---------- AUTHORIZED ----------
+        const username = await response.text();
+
+        label.textContent = username;
+        label.classList.remove("unauthorized");
+        label.classList.add("authorized");
+
+        btn.textContent = "Logout";
+        btn.onclick = logout;
+
+    } catch (err) {
+        console.error("Auth check failed:", err);
+
+        label.textContent = "Auth error";
+        label.classList.add("unauthorized");
+
+        btn.textContent = "Login";
+        btn.onclick = login;
+    }
 }
+
+loadContext();
+
+updateLoginStatus();

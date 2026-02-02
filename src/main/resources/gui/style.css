@@ -502,51 +502,46 @@ td > .icon-btn:only-child {
     transform: rotate(45deg);
 }
 
-.login-button {
-    color: white;
-    border: none;
-    background-color: #008CBA;
-    border-radius: 10%;
-    display: inline-block;
-    padding: 2px 4px;
-    cursor: pointer;
-}
-
-#info-container {
+.header-row {
     display: flex;
-    justify-content: flex-end;
     align-items: center;
-    gap: 10px;
-    padding: 2px;
-    background-color: #e0e0e0;
+    justify-content: space-between;
+    margin-bottom: 1em;
 }
 
-#authorization-message {
-    color: red;
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* space between label and button */
+}
+
+.user-label {
     font-weight: bold;
+    font-size: 0.9em;
+    min-width: 120px; /* prevents layout shift */
+    text-align: right;
 }
 
-#name-info, #expire-info {
-    margin: 0;
+.user-label.unauthorized {
+    color: darkred;
 }
 
-#name-info {
-    font-size: 13px;
-    color: #183f5e;
+.user-label.authorized {
+    color: #1e7e34; /* greenish for logged in user */
 }
 
-#expire-info {
-    font-size: 13px;
-    color: #185d5e;
-}
-
-#logout-button {
-    color: white;
+.button {
+    padding: 6px 12px;
+    background-color: #3498DB;
     border: none;
-    background-color: #008CBA;
-    border-radius: 10%;
-    display: inline-block;
-    padding: 2px 4px;
+    border-radius: 4px;
+    color: white;
     cursor: pointer;
+    font-size: 0.9em;
 }
+
+.button:hover {
+    background-color: #2980B9;
+}
+
 
