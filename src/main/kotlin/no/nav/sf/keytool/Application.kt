@@ -62,8 +62,8 @@ class Application {
             "/internal/metrics" bind Method.GET to Metrics.metricsHttpHandler,
             "/internal/hello" bind Method.GET to { Response(OK).body("Hello") },
             "/internal/secrethello" authbind Method.GET to { r ->
-                val t = tokenValidator.firstValidToken(r)!!.encodedToken
-                Response(OK).body("Secret Hello: $t")
+                val nameOnToken = tokenValidator.firstValidToken(r)!!.jwtClaimsSet.getStringClaim("name")
+                Response(OK).body("$nameOnToken")
             },
             "/internal/gui" bind Method.GET to static(ResourceLoader.Classpath("gui")),
             "/internal/context" bind Method.GET to { Response(OK).body(env(config_CONTEXT)) },
