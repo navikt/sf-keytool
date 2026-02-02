@@ -510,6 +510,9 @@ td > .icon-btn:only-child {
 }
 
 .user-info {
+    height: 60px;
+    background-color: #e8e7e7;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     gap: 10px; /* space between label and button */
@@ -523,7 +526,7 @@ td > .icon-btn:only-child {
 }
 
 .user-label.unauthorized {
-    color: darkred;
+    color: #c30000;
 }
 
 .user-label.authorized {
