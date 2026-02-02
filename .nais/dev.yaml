@@ -52,12 +52,6 @@ spec:
       external:
         - host: test.salesforce.com
         - host: hooks.slack.com
-#  accessPolicy:
-#    inbound:
-#      rules:
-#        - application: salesforce
-#          namespace: teamcrm
-#          cluster: dev-external
   envFrom:
     - secret: sf-pubsub-preprod
     - secret: sf-keytool

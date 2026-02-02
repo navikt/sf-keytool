@@ -64,11 +64,12 @@ class Application {
             "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
             "/internal/gui" bind Method.GET to static(ResourceLoader.Classpath("gui")),
             "/internal/context" bind Method.GET to { Response(OK).body(env(config_CONTEXT)) },
-            "/internal/access" bind Method.GET to { Response(OK).body("Got access token for instance: ${accessTokenHandler.instanceUrl}") },
+            "/internal/access" authbind Method.GET to
+                { Response(OK).body("Got access token for instance: ${accessTokenHandler.instanceUrl}") },
             // Generate + store cert under /tmp/sf-certs/{cn}
-            "/internal/cert/generate" bind Method.POST to certHandler,
+            "/internal/cert/generate" authbind Method.POST to certHandler,
             // List existing certs
-            "/internal/cert/list" bind Method.GET to {
+            "/internal/cert/list" authbind Method.GET to {
                 val payload =
                     listAllCerts().map {
                         mapOf(
@@ -86,17 +87,17 @@ class Application {
                     .body(Gson().toJson(payload))
             },
             // Download files: cer | jks | password
-            "/internal/cert/download/{cn}/{file}" bind Method.GET to { req ->
+            "/internal/cert/download/{cn}/{file}" authbind Method.GET to { req ->
                 val cn = req.path("cn")!!
                 val file = req.path("file")!!
                 downloadHandler(cn, file)
             },
-            "/internal/cert/expiryCheck" bind Method.GET to expiryCheckHandler,
-            "/internal/cert/test" bind Method.POST to testCertHandler,
-            "/internal/cert/delete" bind Method.POST to deleteCertHandler,
-            "/internal/cert/flush" bind Method.POST to flushLocalHandler,
-            "/internal/clearDb" bind Method.GET to clearDbHandler,
-            "/internal/initDb" bind Method.GET to initDbHandler,
+            "/internal/cert/expiryCheck" authbind Method.GET to expiryCheckHandler,
+            "/internal/cert/test" authbind Method.POST to testCertHandler,
+            "/internal/cert/delete" authbind Method.POST to deleteCertHandler,
+            "/internal/cert/flush" authbind Method.POST to flushLocalHandler,
+            "/internal/clearDb" authbind Method.GET to clearDbHandler,
+            "/internal/initDb" authbind Method.GET to initDbHandler,
         )
 
     /**

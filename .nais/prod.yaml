@@ -34,27 +34,26 @@ spec:
         tier: db-f1-micro
         databases:
           - name: sf-keytool-prod
-  #  ingresses:
-  #    - "https://sf-mellomvare.template.intern.nav.no"
-  #  azure:
-  #    application:
-  #      enabled: true
-  #      allowAllUsers: true
-  #      claims:
-  #        extra:
-  #          - azp_name
-  #          - NAVident
-  #    sidecar:
-  #      enabled: false
-  #  accessPolicy:
-  #    inbound:
-  #      rules:
-  #        - application: salesforce
-  #          namespace: teamcrm
-  #          cluster: prod-external
-  #  envFrom:
-  #    - secret: template
-
+#  ingresses:
+#    - "https://sf-mellomvare.template.intern.nav.no"
+#  azure:
+#    application:
+#      enabled: true
+#      allowAllUsers: true
+#      claims:
+#        extra:
+#          - azp_name
+#          - NAVident
+#    sidecar:
+#      enabled: false
+#  accessPolicy:
+#    inbound:
+#      rules:
+#        - application: salesforce
+#          namespace: teamcrm
+#          cluster: prod-external
+#  envFrom:
+#    - secret: template
   env:
     - name: CONTEXT
       value: "PROD"
