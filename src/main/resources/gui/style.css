@@ -521,8 +521,7 @@ td > .icon-btn:only-child {
 .user-label {
     font-weight: bold;
     font-size: 0.9em;
-    min-width: 120px; /* prevents layout shift */
-    text-align: right;
+    margin-left: 1rem;
 }
 
 .user-label.unauthorized {
@@ -535,6 +534,7 @@ td > .icon-btn:only-child {
 
 #loginLogoutBtn {
     margin-top: 0;
+    margin-right: 1rem;
 }
 
 .button:hover {
