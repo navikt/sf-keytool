@@ -533,14 +533,8 @@ td > .icon-btn:only-child {
     color: #1e7e34; /* greenish for logged in user */
 }
 
-.button {
-    padding: 6px 12px;
-    background-color: #3498DB;
-    border: none;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-    font-size: 0.9em;
+#loginLogoutBtn {
+    margin-top: 0;
 }
 
 .button:hover {
