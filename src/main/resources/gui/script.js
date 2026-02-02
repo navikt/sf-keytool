@@ -277,6 +277,10 @@ function flushLocal() {
             });
 
             if (!res.ok) {
+                if (res.status === 401) {
+                    showToast("Not authorized, please login first");
+                    return;
+                }
                 showToast(await res.text());
                 return;
             }
@@ -338,6 +342,10 @@ document.getElementById("generateForm").onsubmit = async e => {
         });
 
         if (!res.ok) {
+            if (res.status === 401) {
+                showToast("Not authorized, please login first");
+                return;
+            }
             showToast(await res.text());
         } else {
             f.reset();
@@ -375,8 +383,16 @@ const checkAuthorization = async () => {
         // Unauthorized
         document.getElementById('authorization-message').innerHTML =
             'Unauthorized <button class="login-button" onclick="login()">Login</button>';
+        document.getElementById('name-info').innerHTML = ''
+        document.getElementById('expire-info').innerHTML = ''
+        document.getElementById('logout-button-holder').innerHTML = ''
         return;
     }
+
+    document.getElementById('name-info').innerHTML = await response.text()
+
+    document.getElementById('logout-button-holder').innerHTML =
+        `<button id="logout-button" onClick="logout()">Logout</button>`
 
     loadCerts();
 };
@@ -384,3 +400,7 @@ const checkAuthorization = async () => {
 const login = () => {
     window.location.href = '/oauth2/login?redirect=/internal/gui';
 };
+
+const logout = () => {
+    window.location.href = '/oauth2/logout?redirect=/internal/gui';
+}
