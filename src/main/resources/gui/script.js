@@ -369,29 +369,6 @@ async function loadContext() {
     }
 }
 
-const checkAuthorization = async () => {
-    const response = await fetch('/internal/secrethello', {
-        method: 'GET'
-    });
-
-    if (response.status === 401) {
-        // Unauthorized
-        document.getElementById('authorization-message').innerHTML =
-            'Unauthorized <button class="login-button" onclick="login()">Login</button>';
-        document.getElementById('name-info').innerHTML = ''
-        document.getElementById('expire-info').innerHTML = ''
-        document.getElementById('logout-button-holder').innerHTML = ''
-        return;
-    }
-
-    document.getElementById('name-info').innerHTML = await response.text()
-
-    document.getElementById('logout-button-holder').innerHTML =
-        `<button id="logout-button" onClick="logout()">Logout</button>`
-
-    loadCerts();
-};
-
 const login = () => {
     window.location.href = '/oauth2/login?redirect=/internal/gui';
 };
@@ -419,6 +396,8 @@ async function updateLoginStatus() {
             btn.onclick = login;
             return;
         }
+
+        loadCerts()
 
         // ---------- AUTHORIZED ----------
         const username = await response.text();
