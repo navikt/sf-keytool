@@ -40,11 +40,6 @@ spec:
     application:
       enabled: true
       allowAllUsers: true
-      tenant: trygdeetaten.no
-      claims:
-        extra:
-          - azp_name
-          - NAVident
     sidecar:
       enabled: true
   accessPolicy:
