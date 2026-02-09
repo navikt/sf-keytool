@@ -50,6 +50,9 @@ spec:
     outbound:
       external:
         - host: test.salesforce.com
+        - host: navdialog--uat.my.salesforce.com
+        - host: navdialog--sit2.my.salesforce.com
+        - host: navdialog--preprod.my.salesforce.com
         - host: hooks.slack.com
   envFrom:
     - secret: sf-pubsub-preprod
