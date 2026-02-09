@@ -53,6 +53,7 @@ spec:
         - host: hooks.slack.com
   envFrom:
     - secret: sf-keytool
+    - secret: sf-eventlog
   env:
     - name: CONTEXT
       value: "PROD"
