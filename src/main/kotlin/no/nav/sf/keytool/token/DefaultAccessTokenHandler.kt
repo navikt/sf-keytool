@@ -1,22 +1,22 @@
 package no.nav.sf.keytool.token
 
 import com.google.gson.Gson
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import no.nav.sf.keytool.config_SF_JWT_USERNAME
 import no.nav.sf.keytool.config_SF_TOKENHOST
+import no.nav.sf.keytool.config_SF_TOKEN_HOST
 import no.nav.sf.keytool.env
 import no.nav.sf.keytool.secret_KEYSTORE_JKS_B64
 import no.nav.sf.keytool.secret_KEYSTORE_PASSWORD
-import no.nav.sf.keytool.secret_PRIVATE_KEY_ALIAS
-import no.nav.sf.keytool.secret_PRIVATE_KEY_PASSWORD
 import no.nav.sf.keytool.secret_SF_CLIENT_ID
+import no.nav.sf.keytool.secret_SF_JWT_CLIENT_ID
+import no.nav.sf.keytool.secret_SF_JWT_KEYSTORE_B64
+import no.nav.sf.keytool.secret_SF_JWT_KEYSTORE_PASSWORD
 import no.nav.sf.keytool.secret_SF_USERNAME
 import org.http4k.client.OkHttp
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
-import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.body.toBody
 import java.security.KeyStore
@@ -29,13 +29,16 @@ import java.util.Base64
  * @see [sf.remoteaccess_oauth_jwt_flow](https://help.salesforce.com/s/articleView?id=sf.remoteaccess_oauth_jwt_flow.htm&type=5)
  *
  * Fetches and caches access token, also retrieves instance url
+ *
+ * Key alias set to "jwt". Assumption for certificates created through keytool, see https://github.com/navikt/sf-keytool
  */
 class DefaultAccessTokenHandler(
-    private val sfTokenHost: String,
-    private val sfClientId: String,
-    private val sfUsername: String,
-    private val keystoreJksB64: String,
-    private val keystorePassword: String,
+    private val sfTokenHost: String = env(config_SF_TOKEN_HOST),
+    private val sfUsername: String = env(config_SF_JWT_USERNAME),
+    private val sfClientId: String = env(secret_SF_JWT_CLIENT_ID),
+    private val keystoreJksB64: String = env(secret_SF_JWT_KEYSTORE_B64),
+    private val keystorePassword: String = env(secret_SF_JWT_KEYSTORE_PASSWORD),
+    private val alias: String = "jwt",
 ) : AccessTokenHandler {
     override val accessToken get() = fetch().first
     override val instanceUrl get() = fetch().second
@@ -122,7 +125,7 @@ class DefaultAccessTokenHandler(
                     keystoreJksB64.decodeB64().inputStream(),
                     keystorePassword.toCharArray(),
                 )
-            }.getKey("jwt", keystorePassword.toCharArray()) as PrivateKey
+            }.getKey(alias, keystorePassword.toCharArray()) as PrivateKey
 
     private fun PrivateKey.sign(data: ByteArray): String =
         Signature

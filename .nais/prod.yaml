@@ -52,6 +52,8 @@ spec:
         - host: navdialog.my.salesforce.com
         - host: hooks.slack.com
   envFrom:
+    - configmap: salesforce-common
+    - configmap: sf-eventlog
     - secret: sf-keytool
     - secret: sf-eventlog
   env:

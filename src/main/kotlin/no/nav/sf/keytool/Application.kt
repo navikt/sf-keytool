@@ -46,11 +46,11 @@ class Application {
 
     val accessTokenHandler =
         DefaultAccessTokenHandler(
-            sfTokenHost = env(config_SF_TOKENHOST),
-            sfClientId = env(secret_SF_CLIENT_ID),
-            sfUsername = env(secret_SF_USERNAME),
-            keystoreJksB64 = env(secret_KEYSTORE_JKS_B64),
-            keystorePassword = env(secret_KEYSTORE_PASSWORD),
+            sfTokenHost = env(config_SF_TOKEN_HOST),
+            sfUsername = env(config_SF_JWT_USERNAME),
+            sfClientId = env(secret_SF_JWT_CLIENT_ID),
+            keystoreJksB64 = env(secret_SF_JWT_KEYSTORE_B64),
+            keystorePassword = env(secret_SF_JWT_KEYSTORE_PASSWORD),
         )
 
     fun apiServer(port: Int): Http4kServer = api().asServer(Netty(port))
