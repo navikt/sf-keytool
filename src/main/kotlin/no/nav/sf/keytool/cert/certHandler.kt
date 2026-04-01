@@ -141,6 +141,7 @@ fun downloadHandler(
     val target =
         when (file) {
             "cer" -> File(dir, "$cn.cer")
+            "pem" -> File(dir, "$cn.pem")
             "jks" -> File(dir, "$cn.jks")
             "jksb64" -> File(dir, "$cn.jks.b64")
             "password" -> File(dir, "password.txt")

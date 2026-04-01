@@ -61,7 +61,7 @@ async function loadCerts() {
 
       <td class="center">
         ${isTmp
-            ? `<button title="Download certificate" onclick="download('${c.cn}', 'cer')" data-variant="tertiary" class="icon-btn aksel-button aksel-button--tertiary aksel-button--small aksel-button--icon-only"><!----><!----><span class="aksel-button__icon"><!----><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" focusable="false" role="img" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M12 2.75a.75.75 0 0 1 .75.75v9.19l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 1 1 1.06-1.06l2.72 2.72V3.5a.75.75 0 0 1 .75-.75M5.75 18a.75.75 0 0 1 .75-.75h11a.75.75 0 0 1 0 1.5h-11a.75.75 0 0 1-.75-.75" clip-rule="evenodd"/></svg></span></button>`
+            ? `<button title="Download certificate" onclick="download('${c.cn}', 'pem')" data-variant="tertiary" class="icon-btn aksel-button aksel-button--tertiary aksel-button--small aksel-button--icon-only"><!----><!----><span class="aksel-button__icon"><!----><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" focusable="false" role="img" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M12 2.75a.75.75 0 0 1 .75.75v9.19l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 1 1 1.06-1.06l2.72 2.72V3.5a.75.75 0 0 1 .75-.75M5.75 18a.75.75 0 0 1 .75-.75h11a.75.75 0 0 1 0 1.5h-11a.75.75 0 0 1-.75-.75" clip-rule="evenodd"/></svg></span></button>`
             : ``}
       </td>
       <td class="center">
