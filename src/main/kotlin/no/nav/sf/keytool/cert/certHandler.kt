@@ -2,7 +2,6 @@
 
 package no.nav.sf.keytool.cert
 
-import no.nav.sf.keytool.config_CONTEXT
 import no.nav.sf.keytool.config_SF_TOKENHOST
 import no.nav.sf.keytool.db.PostgresDatabase
 import no.nav.sf.keytool.env
@@ -13,23 +12,22 @@ import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
-import org.http4k.core.Body
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
-import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.body.form
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileWriter
 import java.math.BigInteger
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.SecureRandom
-import java.security.Security
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.time.Duration
@@ -60,7 +58,8 @@ fun generateAndStoreCert(
     val jksBytes = createKeystore(keyPair.private, cert, password)
     val jksB64 = Base64.getEncoder().encodeToString(jksBytes)
 
-    File(dir, "$cn.cer").writeBytes(cert.encoded)
+    // File(dir, "$cn.cer").writeBytes(cert.encoded)
+    writeCertificatePem(cert, File(dir, "$cn.pem"))
     File(dir, "$cn.jks").writeBytes(jksBytes)
     File(dir, "$cn.jks.b64").writeText(jksB64)
     File(dir, "password.txt").writeText(password)
@@ -76,6 +75,17 @@ fun generateAndStoreCert(
     )
 
     return CertMetadata(cn, expiresAt, null, null)
+}
+
+fun writeCertificatePem(
+    cert: X509Certificate,
+    file: File,
+) {
+    FileWriter(file).use { writer ->
+        JcaPEMWriter(writer).use { pemWriter ->
+            pemWriter.writeObject(cert)
+        }
+    }
 }
 
 fun listTmpCerts(): List<CertMetadata> =

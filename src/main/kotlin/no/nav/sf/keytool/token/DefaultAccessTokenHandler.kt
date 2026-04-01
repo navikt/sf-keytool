@@ -52,9 +52,11 @@ class DefaultAccessTokenHandler(
     private var cached: Triple<String, String, String>? = null
     private var expireAtMillis = 0L
 
-    private fun fetch(): Triple<String, String, String> {
+    fun testAccess(): Boolean = fetch(true).first.isNotEmpty()
+
+    private fun fetch(ignoreCache: Boolean = false): Triple<String, String, String> {
         val now = System.currentTimeMillis()
-        if (cached != null && now < expireAtMillis) {
+        if (!ignoreCache && cached != null && now < expireAtMillis) {
             log.debug { "Using cached Salesforce access token" }
             return cached!!
         }
