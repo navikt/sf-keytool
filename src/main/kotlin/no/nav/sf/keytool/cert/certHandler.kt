@@ -314,7 +314,7 @@ fun readCertificate(
     dir: File,
     cn: String,
 ): X509Certificate =
-    File(dir, "$cn.cer").inputStream().use { input ->
+    File(dir, "$cn.pem").inputStream().use { input ->
         CertificateFactory
             .getInstance("X.509")
             .generateCertificate(input) as X509Certificate
