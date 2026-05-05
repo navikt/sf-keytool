@@ -1,4 +1,5 @@
 let currentTestCn = null;
+let currentEnv = null;
 let existingCns = new Set();
 
 async function loadCerts() {
@@ -105,7 +106,9 @@ async function loadCerts() {
             ? `<button title="Generate NAIS secret commands"
                 onclick="generateNaisCommands('${c.cn}', '${c.sfClientId}', '${c.sfUsername}')"
                 class="icon-btn aksel-button aksel-button--tertiary aksel-button--small">
-                🧾
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M3 4.25C2.58579 4.25 2.25 4.58579 2.25 5V19C2.25 19.4142 2.58579 19.75 3 19.75H21C21.4142 19.75 21.75 19.4142 21.75 19V5C21.75 4.58579 21.4142 4.25 21 4.25H3ZM3.75 18.25V5.75H20.25V18.25H3.75ZM6 12.25C5.58579 12.25 5.25 12.5858 5.25 13C5.25 13.4142 5.58579 13.75 6 13.75H10C10.4142 13.75 10.75 13.4142 10.75 13C10.75 12.5858 10.4142 12.25 10 12.25H6ZM5.25 16C5.25 15.5858 5.58579 15.25 6 15.25H8C8.41421 15.25 8.75 15.5858 8.75 16C8.75 16.4142 8.41421 16.75 8 16.75H6C5.58579 16.75 5.25 16.4142 5.25 16ZM11 15.25C10.5858 15.25 10.25 15.5858 10.25 16C10.25 16.4142 10.5858 16.75 11 16.75H13C13.4142 16.75 13.75 16.4142 13.75 16C13.75 15.5858 13.4142 15.25 13 15.25H11ZM12.25 13C12.25 12.5858 12.5858 12.25 13 12.25H15C15.4142 12.25 15.75 12.5858 15.75 13C15.75 13.4142 15.4142 13.75 15 13.75H13C12.5858 13.75 12.25 13.4142 12.25 13ZM16 15.25C15.5858 15.25 15.25 15.5858 15.25 16C15.25 16.4142 15.5858 16.75 16 16.75H18C18.4142 16.75 18.75 16.4142 18.75 16C18.75 15.5858 18.4142 15.25 18 15.25H16Z" fill="#202733"/>
+                </svg>
         </button>`
             : ``}
       <button title="Delete certificate information" onclick="deleteCert('${c.cn}', '${c.source}')" data-color="neutral" data-variant="tertiary" class="icon-btn aksel-button aksel-button--tertiary-neutral aksel-button--small aksel-button--icon-only"><!----><!----><span class="aksel-button__icon"><!----><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" focusable="false" role="img" viewBox="0 0 24 24" style="color: var(--ax-text-danger-decoration) !important;"><!----><!----><path fill="currentColor" fill-rule="evenodd" d="M4.5 6.25a.75.75 0 0 0 0 1.5h.805l.876 11.384a1.75 1.75 0 0 0 1.745 1.616h8.148a1.75 1.75 0 0 0 1.745-1.616l.876-11.384h.805a.75.75 0 0 0 0-1.5h-2.75V6A2.75 2.75 0 0 0 14 3.25h-4A2.75 2.75 0 0 0 7.25 6v.25zm5.5-1.5c-.69 0-1.25.56-1.25 1.25v.25h6.5V6c0-.69-.56-1.25-1.25-1.25zm-3.19 3 .867 11.27c.01.13.118.23.249.23h8.148c.13 0 .24-.1.25-.23l.866-11.27zm3.19 2a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6a.75.75 0 0 1 .75-.75m4 0a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6a.75.75 0 0 1 .75-.75" clip-rule="evenodd"></path></svg></span></button>
@@ -370,6 +373,8 @@ async function loadContext() {
         if (!res.ok) return;
 
         const env = (await res.text()).trim().toUpperCase();
+
+        currentEnv = env.toLowerCase() + "-gcp";
         document.getElementById("envTag").textContent = ` (${env})`;
     } catch (e) {
         console.warn("Could not load context", e);
@@ -437,8 +442,8 @@ async function generateNaisCommands(cn, clientId, username) {
         const password = await passwordRes.text();
 
         // adjust these if needed
-        const secretName = "migration-sit2";
-        const env = "dev-gcp";
+        const secretName = cn;
+        const env = currentEnv;
 
         const commands = [
             `nais secret set ${secretName} -e ${env} --key SF_JWT_KEYSTORE_B64 --value '${jks}'`,
