@@ -91,7 +91,7 @@ async function loadCerts() {
         }
 </td>
 
-      <td class="center">
+<td class="center">
   ${
             isTmp && c.sfUsername
                 ? `<button title="Copy SF Username" onclick="copyValue('${c.sfUsername}', 'SF_USERNAME')" type="button" data-active="false" data-variant="tertiary" class="icon-btn aksel-copybutton aksel-button aksel-button&#45;&#45;tertiary aksel-button&#45;&#45;small aksel-button&#45;&#45;icon-only"><span class="aksel-button__icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" focusable="false" role="img" viewBox="0 0 24 24" aria-labelledby="c267" aria-hidden="false" class="aksel-copybutton__icon"><title id="c267">Copy</title><path fill="currentColor" fill-rule="evenodd" d="M8.25 3.5c0-.69.56-1.25 1.25-1.25H14a.75.75 0 0 1 .53.22l5 5c.141.14.22.331.22.53v8.5c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25zm6.25 5.25c-.69 0-1.25-.56-1.25-1.25V3.75h-3.5v12.5h8.5v-7.5zm.25-3.94 2.44 2.44h-2.44zM6.502 7.75H5.75v12.5h8.5v-.748a.75.75 0 0 1 1.5 0v.998c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25v-13c0-.69.56-1.25 1.25-1.25h1.002a.75.75 0 1 1 0 1.5" clip-rule="evenodd"></path></svg></span>  </button>`
@@ -100,7 +100,14 @@ async function loadCerts() {
                     : ``)
         }
 </td>
-      <td class="center">
+<td class="center">
+        ${isTmp && c.sfClientId && c.sfUsername 
+            ? `<button title="Generate NAIS secret commands"
+                onclick="generateNaisCommands('${c.cn}', '${c.sfClientId}', '${c.sfUsername}')"
+                class="icon-btn aksel-button aksel-button--tertiary aksel-button--small">
+                🧾
+        </button>`
+            : ``}
       <button title="Delete certificate information" onclick="deleteCert('${c.cn}', '${c.source}')" data-color="neutral" data-variant="tertiary" class="icon-btn aksel-button aksel-button--tertiary-neutral aksel-button--small aksel-button--icon-only"><!----><!----><span class="aksel-button__icon"><!----><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" focusable="false" role="img" viewBox="0 0 24 24" style="color: var(--ax-text-danger-decoration) !important;"><!----><!----><path fill="currentColor" fill-rule="evenodd" d="M4.5 6.25a.75.75 0 0 0 0 1.5h.805l.876 11.384a1.75 1.75 0 0 0 1.745 1.616h8.148a1.75 1.75 0 0 0 1.745-1.616l.876-11.384h.805a.75.75 0 0 0 0-1.5h-2.75V6A2.75 2.75 0 0 0 14 3.25h-4A2.75 2.75 0 0 0 7.25 6v.25zm5.5-1.5c-.69 0-1.25.56-1.25 1.25v.25h6.5V6c0-.69-.56-1.25-1.25-1.25zm-3.19 3 .867 11.27c.01.13.118.23.249.23h8.148c.13 0 .24-.1.25-.23l.866-11.27zm3.19 2a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6a.75.75 0 0 1 .75-.75m4 0a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6a.75.75 0 0 1 .75-.75" clip-rule="evenodd"></path></svg></span></button>
 </td>
 `;
@@ -418,6 +425,45 @@ async function updateLoginStatus() {
         btn.textContent = "Login";
         btn.onclick = login;
     }
+}
+
+async function generateNaisCommands(cn, clientId, username) {
+    try {
+        // fetch secrets
+        const jksRes = await fetch(`/internal/cert/download/${cn}/jksb64`);
+        const passwordRes = await fetch(`/internal/cert/download/${cn}/password`);
+
+        const jks = await jksRes.text();
+        const password = await passwordRes.text();
+
+        // adjust these if needed
+        const secretName = "migration-sit2";
+        const env = "dev-gcp";
+
+        const commands = [
+            `nais secret set ${secretName} -e ${env} --key SF_JWT_KEYSTORE_B64 --value '${jks}'`,
+            `nais secret set ${secretName} -e ${env} --key SF_JWT_KEYSTORE_PASSWORD --value '${password}'`,
+            `nais secret set ${secretName} -e ${env} --key SF_JWT_CLIENT_ID --value '${clientId}'`,
+            `nais secret set ${secretName} -e ${env} --key SF_JWT_USERNAME --value '${username}'`
+        ].join(";\n");
+
+        showCommandModal(commands);
+
+    } catch (e) {
+        console.error(e);
+        showToast("Failed to generate NAIS commands");
+    }
+}
+
+function showCommandModal(commands) {
+    openConfirmModal(
+        "NAIS Secret Commands",
+        commands,
+        null
+    );
+
+    const msg = document.getElementById("confirmMessage");
+    msg.style.whiteSpace = "pre-wrap";
 }
 
 loadContext();
