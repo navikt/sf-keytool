@@ -448,7 +448,6 @@ async function generateNaisCommands(cn, clientId, username) {
         const commands = [
             `nais secret set ${secretName} -e ${env} --key SF_JWT_KEYSTORE_B64 --value '${jks}'`,
             `nais secret set ${secretName} -e ${env} --key SF_JWT_KEYSTORE_PASSWORD --value '${password}'`,
-            `nais secret set ${secretName} -e ${env} --key SF_JWT_CLIENT_ID --value '${clientId}'`,
             `nais secret set ${secretName} -e ${env} --key SF_JWT_USERNAME --value '${username}'`
         ].join(";\n");
 
