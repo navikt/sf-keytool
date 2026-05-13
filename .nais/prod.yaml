@@ -53,8 +53,8 @@ spec:
         - host: hooks.slack.com
   envFrom:
     - configmap: salesforce-common
+    - secret: sf-pubsub-prod
     - secret: sf-keytool
-    - secret: sf-eventlog
   env:
     - name: CONTEXT
       value: "PROD"
