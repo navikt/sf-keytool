@@ -44,15 +44,6 @@ class Application {
 
     val cluster = if (local) "local" else env(env_NAIS_CLUSTER_NAME)
 
-    val accessTokenHandler =
-        DefaultAccessTokenHandler(
-            sfTokenHost = env(config_SF_TOKEN_HOST),
-            sfUsername = env(config_SF_JWT_USERNAME),
-            sfClientId = env(secret_SF_JWT_CLIENT_ID),
-            keystoreJksB64 = env(secret_SF_JWT_KEYSTORE_B64),
-            keystorePassword = env(secret_SF_JWT_KEYSTORE_PASSWORD),
-        )
-
     fun apiServer(port: Int): Http4kServer = api().asServer(Netty(port))
 
     fun api(): HttpHandler =
@@ -68,7 +59,17 @@ class Application {
             "/internal/gui" bind Method.GET to static(ResourceLoader.Classpath("gui")),
             "/internal/context" bind Method.GET to { Response(OK).body(env(config_CONTEXT)) },
             "/internal/access" authbind Method.GET to
-                { Response(OK).body("Got access token for instance: ${accessTokenHandler.instanceUrl}") },
+                {
+                    val accessTokenHandler =
+                        DefaultAccessTokenHandler(
+                            sfTokenHost = env(config_SF_TOKEN_HOST),
+                            sfUsername = env(config_SF_JWT_USERNAME),
+                            sfClientId = env(secret_SF_JWT_CLIENT_ID),
+                            keystoreJksB64 = env(secret_SF_JWT_KEYSTORE_B64),
+                            keystorePassword = env(secret_SF_JWT_KEYSTORE_PASSWORD),
+                        )
+                    Response(OK).body("Got access token for instance: ${accessTokenHandler.instanceUrl}")
+                },
             // Generate + store cert under /tmp/sf-certs/{cn}
             "/internal/cert/generate" authbind Method.POST to certHandler,
             // List existing certs
