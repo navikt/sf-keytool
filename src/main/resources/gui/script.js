@@ -447,24 +447,35 @@ async function generateNaisCommands(cn, clientId, username) {
 
         // validation client id based on secret name
         let validationClientId;
+        let migrationSecret;
+        let printAsClientId;
 
         if (secretName.endsWith("sit2")) {
             validationClientId =
                 "3MVG9T992fY2Y4vt1vOIG2qFt0emLni8GA5KgM9Z9g3mLVoNhrA.hUG1GfScPXknyn3lVsUmqzwuQ4O2nE7H3";
+            migrationSecret = "migration-sit2"
         } else if (secretName.endsWith("preprod")) {
             validationClientId =
                 "3MVG9sSN_PMn8tjTXcqWr9HqgZaEJFXaptXSRH13rWhwChzQIKLcYDjkvhdVQvgSCrreldg6G_b9268_90I80";
+            migrationSecret = "migration-preprod";
         } else {
             validationClientId =
                 "3MVG9Ve.2wqUVx_Z3N2_xrMOSIV1kaI8FRfHwCAO9hnkkaAZC2BJnqqH.N5IQmsfMJo_zaz4NhXXFoYcLWSM6";
+            migrationSecret = "migration-prod";
+        }
+
+        if (validationClientId === clientId) {
+            printAsClientId = "replace-me"
+        } else {
+            printAsClientId = clientId
         }
 
         const commands = [
             `nais secret set ${secretName} -e ${env} --key SF_JWT_KEYSTORE_B64 --value '${jks}'`,
             `nais secret set ${secretName} -e ${env} --key SF_JWT_KEYSTORE_PASSWORD --value '${password}'`,
-            `nais secret set ${secretName} -e ${env} --key SF_JWT_CLIENT_ID --value '${clientId}'`,
             `nais secret set ${secretName} -e ${env} --key SF_JWT_USERNAME --value '${username}'`,
-            `nais secret set ${secretName} -e ${env} --key SF_VALIDATION_CLIENT_ID --value '${validationClientId}'`
+            `nais secret set ${migrationSecret} -e ${env} --key SF_VALIDATION_CLIENT_ID --value '${validationClientId}'`,
+            `nais secret set ${secretName} -e ${env} --key SF_JWT_CLIENT_ID --value '${printAsClientId}'`
         ].join(";\n");
 
         showCommandModal(commands);
