@@ -2,6 +2,12 @@ let currentTestCn = null;
 let currentEnv = null;
 let existingCns = new Set();
 
+const KNOWN_VALIDATION_APPS = {
+    sit2: "3MVG9T992fY2Y4vt1vOIG2qFt0emLni8GA5KgM9Z9g3mLVoNhrA.hUG1GfScPXknyn3lVsUmqzwuQ4O2nE7H3",
+    preprod: "3MVG9sSN_PMn8tjTXcqWr9HqgZaEJFXaptXSRH13rWhwChzQIKLcYDjkvhdVQvgSCrreldg6G_b9268_90I80",
+    prod: "3MVG9Ve.2wqUVx_Z3N2_xrMOSIV1kaI8FRfHwCAO9hnkkaAZC2BJnqqH.N5IQmsfMJo_zaz4NhXXFoYcLWSM6"
+};
+
 async function loadCerts() {
     const res = await fetch("/internal/cert/list");
     const list = await res.json();
@@ -86,8 +92,8 @@ async function loadCerts() {
   ${
             isTmp && c.sfClientId
                 ? `<button title="Copy SF Client ID" onclick="copyValue('${c.sfClientId}', 'SF_CLIENT_ID')" type="button" data-active="false" data-variant="tertiary" class="icon-btn aksel-copybutton aksel-button aksel-button&#45;&#45;tertiary aksel-button&#45;&#45;small aksel-button&#45;&#45;icon-only"><span class="aksel-button__icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" focusable="false" role="img" viewBox="0 0 24 24" aria-labelledby="c267" aria-hidden="false" class="aksel-copybutton__icon"><title id="c267">Copy</title><path fill="currentColor" fill-rule="evenodd" d="M8.25 3.5c0-.69.56-1.25 1.25-1.25H14a.75.75 0 0 1 .53.22l5 5c.141.14.22.331.22.53v8.5c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25zm6.25 5.25c-.69 0-1.25-.56-1.25-1.25V3.75h-3.5v12.5h8.5v-7.5zm.25-3.94 2.44 2.44h-2.44zM6.502 7.75H5.75v12.5h8.5v-.748a.75.75 0 0 1 1.5 0v.998c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25v-13c0-.69.56-1.25 1.25-1.25h1.002a.75.75 0 1 1 0 1.5" clip-rule="evenodd"></path></svg></span>  </button>`
-                : (!isTmp && c.sfClientId
-                    ? `<span title="Masked Client ID">${c.sfClientId}</span>`
+                : (!isTmp && c.sfClientId   
+                    ? `<span title="Masked Client ID">${migrationLabel(c.sfClientId) ?? `***${last10(c.sfClientId)}`}</span>`
                     : ``)
         }
 </td>
@@ -135,6 +141,25 @@ function last10(str) {
     return str.slice(-10);
 }
 
+function isKnownValidationClientId(clientId) {
+    const suffix = last10(clientId);
+
+    return Object.values(KNOWN_VALIDATION_APPS)
+        .some(v => last10(v) === suffix);
+}
+
+function migrationLabel(clientId) {
+    const suffix = last10(clientId);
+
+    for (const [env, value] of Object.entries(KNOWN_VALIDATION_APPS)) {
+        if (last10(value) === suffix) {
+            return `tested on migration-${env}`;
+        }
+    }
+
+    return null;
+}
+
 function showDuplicateWarnings(list) {
     const deprecated = new Set();
 
@@ -157,6 +182,11 @@ function showDuplicateWarnings(list) {
 
     groups.forEach(certs => {
         if (certs.length <= 1) return;
+
+        // ignore intentional migration app duplicates
+        if (isKnownValidationClientId(certs[0].sfClientId)) {
+            return;
+        }
 
         // Sort by expiresAt DESC (newest first)
         certs.sort(
