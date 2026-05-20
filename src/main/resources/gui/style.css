@@ -1,6 +1,6 @@
 :root {
     font-family: "Source Sans 3", "Source Sans Pro", system-ui, sans-serif;
-    font-size: 1.1rem;
+    font-size: 1.01rem;
     --ax-text-neutral: #262626;
     --ax-text-subtle: #6a6a6a;
     --ax-text-danger-decoration: #c30000;
@@ -541,4 +541,18 @@ td > .icon-btn:only-child {
     background-color: #2980B9;
 }
 
+.migration-pill {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
 
+    background-color: #e6f4ea;
+    color: #1e7e34;
+
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.2;
+
+    white-space: nowrap;
+    border: 1px solid #b7e1c1;
+}

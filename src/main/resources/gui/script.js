@@ -92,8 +92,14 @@ async function loadCerts() {
   ${
             isTmp && c.sfClientId
                 ? `<button title="Copy SF Client ID" onclick="copyValue('${c.sfClientId}', 'SF_CLIENT_ID')" type="button" data-active="false" data-variant="tertiary" class="icon-btn aksel-copybutton aksel-button aksel-button&#45;&#45;tertiary aksel-button&#45;&#45;small aksel-button&#45;&#45;icon-only"><span class="aksel-button__icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" focusable="false" role="img" viewBox="0 0 24 24" aria-labelledby="c267" aria-hidden="false" class="aksel-copybutton__icon"><title id="c267">Copy</title><path fill="currentColor" fill-rule="evenodd" d="M8.25 3.5c0-.69.56-1.25 1.25-1.25H14a.75.75 0 0 1 .53.22l5 5c.141.14.22.331.22.53v8.5c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25zm6.25 5.25c-.69 0-1.25-.56-1.25-1.25V3.75h-3.5v12.5h8.5v-7.5zm.25-3.94 2.44 2.44h-2.44zM6.502 7.75H5.75v12.5h8.5v-.748a.75.75 0 0 1 1.5 0v.998c0 .69-.56 1.25-1.25 1.25h-9c-.69 0-1.25-.56-1.25-1.25v-13c0-.69.56-1.25 1.25-1.25h1.002a.75.75 0 1 1 0 1.5" clip-rule="evenodd"></path></svg></span>  </button>`
-                : (!isTmp && c.sfClientId   
-                    ? `<span title="Masked Client ID">${migrationLabel(c.sfClientId) ?? `***${last10(c.sfClientId)}`}</span>`
+                : (!isTmp && c.sfClientId
+                    ? `${
+                        migrationLabel(c.sfClientId)
+                            ? `<span class="migration-pill" title="Known migration validation app">
+              ${migrationLabel(c.sfClientId)}
+           </span>`
+                            : `<span title="Masked Client ID">***${last10(c.sfClientId)}</span>`
+                    }`
                     : ``)
         }
 </td>
