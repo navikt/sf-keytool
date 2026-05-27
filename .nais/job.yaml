@@ -1,0 +1,18 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  name: audit-logging-fetch-and-log-job
+  namespace: platforce
+  labels:
+    team: platforce
+spec:
+  schedule: "0 3 * * *"  # This will run the job every day at 03:00 AM UTC (04:00 AM CET)
+  image: "{{ image }}" # Will use cgr.dev/chainguard/curl:latest via Dockerfile-job
+  accessPolicy:
+    outbound:
+      rules:
+        - application: sf-keytool
+  command:
+    - curl
+    - http://sf-keytool/internal/cert/expiryCheck
+  restartPolicy: Never
