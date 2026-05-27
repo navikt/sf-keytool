@@ -1,7 +1,7 @@
 apiVersion: nais.io/v1
 kind: Naisjob
 metadata:
-  name: audit-logging-fetch-and-log-job
+  name: sf-key-tool-expiry-check
   namespace: platforce
   labels:
     team: platforce
