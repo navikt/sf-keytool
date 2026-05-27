@@ -47,6 +47,9 @@ spec:
     sidecar:
       enabled: true
   accessPolicy:
+    inbound:
+      rules:
+        - application: sf-key-tool-expiry-check
     outbound:
       external:
         - host: test.salesforce.com
