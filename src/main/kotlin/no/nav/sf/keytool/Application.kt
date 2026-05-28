@@ -96,7 +96,7 @@ class Application {
                 val file = req.path("file")!!
                 downloadHandler(cn, file)
             },
-            "/internal/cert/expiryCheck" authbind Method.GET to expiryCheckHandler,
+            "/internal/cert/expiryCheck" bind Method.GET to expiryCheckHandler,
             "/internal/cert/test" authbind Method.POST to testCertHandler,
             "/internal/cert/delete" authbind Method.POST to deleteCertHandler,
             "/internal/cert/flush" authbind Method.POST to flushLocalHandler,
