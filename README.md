@@ -1,4 +1,4 @@
-# sf-keytool
+# sf-keytool [<img align="right" src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="18" alt="GitHub repository" />](https://github.com/navikt/sf-keytool)
 Tool for generating and managing JWT certificates used for Salesforce middleware integrations.
 
 ## Purpose
