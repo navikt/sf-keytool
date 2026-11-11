@@ -383,12 +383,17 @@ val expiryCheckHandler: HttpHandler = {
 
                 expiring.forEach { (cert, daysLeft) ->
                     when {
-                        daysLeft < 0 ->
+                        daysLeft < 0 -> {
                             appendLine("- ${cert.cn} (expired ${-daysLeft} days ago)")
-                        daysLeft == 0L ->
+                        }
+
+                        daysLeft == 0L -> {
                             appendLine("- ${cert.cn} (expires today)")
-                        else ->
+                        }
+
+                        else -> {
                             appendLine("- ${cert.cn} ($daysLeft days left)")
+                        }
                     }
                 }
             }
@@ -400,12 +405,17 @@ val expiryCheckHandler: HttpHandler = {
         val expiringLines =
             expiring.map { (cert, daysLeft) ->
                 when {
-                    daysLeft < 0 ->
+                    daysLeft < 0 -> {
                         "*${cert.cn}* – expired ${-daysLeft} days ago"
-                    daysLeft == 0L ->
+                    }
+
+                    daysLeft == 0L -> {
                         "*${cert.cn}* – expires today"
-                    else ->
+                    }
+
+                    else -> {
                         "*${cert.cn}* – $daysLeft days left"
+                    }
                 }
             }
 
