@@ -43,12 +43,12 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:1.6.6"
     implementation "net.logstash.logback:logstash-logback-encoder:9.0"
 
-    implementation "tools.jackson.core:jackson-databind:3.2.4" // Transitive dependency for net.logstash.logback:logstash-logback-encoder:9.0
+    implementation "tools.jackson.core:jackson-databind:3.3.0" // Transitive dependency for net.logstash.logback:logstash-logback-encoder:9.0
     implementation "io.prometheus:simpleclient_common:0.9.0"
     implementation "io.prometheus:simpleclient_hotspot:0.9.0"
 
-    implementation('org.bouncycastle:bcprov-jdk18on:1.86')
-    implementation('org.bouncycastle:bcpkix-jdk18on:1.86')
+    implementation('org.bouncycastle:bcprov-jdk18on:1.87')
+    implementation('org.bouncycastle:bcpkix-jdk18on:1.87')
 
     implementation("org.postgresql:postgresql:42.7.14")
 
@@ -78,4 +78,11 @@ sourceSets {
 
 kotlin {
     jvmToolchain(21)
+}
+
+tasks.named('shadowJar') {
+    mergeServiceFiles()
+    filesMatching(['META-INF/services/**', 'META-INF/*.kotlin_module']) {
+        duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
+    }
 }
